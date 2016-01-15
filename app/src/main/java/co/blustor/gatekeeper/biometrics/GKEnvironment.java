@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import co.blustor.gatekeeperdemo.R;
+import co.blustor.gatekeeper.R;
 
 public class GKEnvironment {
     public static final String TAG = GKEnvironment.class.getSimpleName();
