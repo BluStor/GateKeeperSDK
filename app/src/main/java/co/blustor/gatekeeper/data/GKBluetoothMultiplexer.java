@@ -24,6 +24,7 @@ public class GKBluetoothMultiplexer {
 
     private static final byte CARRIAGE_RETURN = 13;
     private static final byte LINE_FEED = 10;
+    private static final byte TERMINATE_CHANNEL_BYTE = (byte) 0x128;
 
     private final BluetoothSocket mSocket;
     private final GKCard mCard;
@@ -33,6 +34,7 @@ public class GKBluetoothMultiplexer {
     private Thread mBufferingThread;
 
     private GKCard.ConnectionState mConnectionState = GKCard.ConnectionState.DISCONNECTED;
+    private boolean mExiting = false;
 
     {
         for (int i = 0; i <= MAX_CHANNEL_NUMBER; i++) {
@@ -90,6 +92,8 @@ public class GKBluetoothMultiplexer {
 
     private void cleanup() {
         try {
+            mExiting = true;
+            terminateChannelReaders();
             mInputStream.close();
             mOutputStream.close();
             if (mSocket != null) {
@@ -97,8 +101,16 @@ public class GKBluetoothMultiplexer {
             }
         } catch (IOException e) {
             Log.e(TAG, "Exception occurred during cleanup", e);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         } finally {
             updateConnectionState(GKCard.ConnectionState.DISCONNECTED);
+        }
+    }
+
+    private void terminateChannelReaders() throws InterruptedException {
+        for (int i = 0; i <= MAX_CHANNEL_NUMBER; i++) {
+            mChannelBuffers[i].put(TERMINATE_CHANNEL_BYTE);
         }
     }
 
@@ -148,7 +160,11 @@ public class GKBluetoothMultiplexer {
         BlockingQueue<Byte> buffer = mChannelBuffers[channel];
         int bytesRead = 0;
         for (int i = 0; i < len; i++) {
-            data[off + i] = buffer.take();
+            Byte byteTaken = buffer.take();
+            if (mExiting && (byteTaken == TERMINATE_CHANNEL_BYTE)) {
+                throw new IOException();
+            }
+            data[off + i] = byteTaken;
             bytesRead = i;
         }
         return bytesRead + 1;
