@@ -13,9 +13,9 @@ public class GKFileUtils {
 
     public static final String ROOT = "/";
 
-    public static String joinPath(Object... paths) {
+    public static String joinPath(String... paths) {
         ArrayList<String> list = nonblankPathSegments(paths);
-        return GKStringUtils.join(list.toArray(), "/").replace("//", "/");
+        return GKStringUtils.join(list.toArray(new String[list.size()]), "/").replace("//", "/");
     }
 
     public static ArrayList<String> parsePath(String path) {
