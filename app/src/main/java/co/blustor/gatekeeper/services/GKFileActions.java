@@ -13,27 +13,72 @@ import co.blustor.gatekeeper.data.GKFile;
 import co.blustor.gatekeeper.devices.GKCard;
 import co.blustor.gatekeeper.devices.GKCard.Response;
 
+/**
+ * GKFileActions is a Service for handling file data with the GateKeeper Card.
+ */
 public class GKFileActions {
     public static final String TAG = GKFileActions.class.getSimpleName();
 
+    /**
+     * Status is the named result of an action.
+     */
     public enum Status {
+        /**
+         * The action was successful.
+         */
         SUCCESS,
+
+        /**
+         * The client is not currently Authenticated with the GateKeeper Card.
+         */
         UNAUTHORIZED,
+
+        /**
+         * The target path of the action could not be found.
+         */
         NOT_FOUND,
+
+        /**
+         * The GateKeeper Card API returned a result that GKCardSettings does
+         * not understand.
+         */
         UNKNOWN_STATUS
     }
 
     private final GKCard mCard;
 
+    /**
+     * Create a {@code GKFileActions} that communicates with {@code card}.
+     *
+     * @param card the {@code GKCard} to be used with file actions
+     * @since 0.5.0
+     */
     public GKFileActions(GKCard card) {
         mCard = card;
     }
 
+    /**
+     * Retrieve a list of files stored at the given path on the GateKeeper Card.
+     *
+     * @param cardPath the path at which to retrieve the list of files
+     * @return the {@code ListFilesResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public ListFilesResult listFiles(String cardPath) throws IOException {
         Response response = mCard.list(cardPath);
         return new ListFilesResult(response, cardPath);
     }
 
+    /**
+     * Retrieve the given file from the GateKeeper Card.
+     *
+     * @param file      a {@code GKFile} referencing the file to retrieve
+     * @param localFile a {@code File} to store retrieved file data
+     * @return the {@code GetFileResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public GetFileResult getFile(final GKFile file, File localFile) throws IOException {
         Response response = mCard.get(file.getCardPath());
         GetFileResult result = new GetFileResult(response, localFile);
@@ -44,6 +89,15 @@ public class GKFileActions {
         return result;
     }
 
+    /**
+     * Store the given data to the given path on the GateKeeper Card.
+     *
+     * @param localFile a stream with file data
+     * @param cardPath  the path at which to store the file data
+     * @return the {@code FileResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public FileResult putFile(InputStream localFile, String cardPath) throws IOException {
         Response response = mCard.put(cardPath, localFile);
         if (response.getStatus() != 226) {
@@ -53,6 +107,14 @@ public class GKFileActions {
         return new FileResult(finalize);
     }
 
+    /**
+     * Delete the given file on the GateKeeper Card.
+     *
+     * @param file a {@code GKFile} referencing the file to delete
+     * @return the {@code FileResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public FileResult deleteFile(GKFile file) throws IOException {
         Response response;
         if (file.getType() == GKFile.Type.FILE) {
@@ -63,6 +125,14 @@ public class GKFileActions {
         return new FileResult(response);
     }
 
+    /**
+     * Create a directory at the given path on the GateKeeper Card.
+     *
+     * @param cardPath the path at which to create the directory
+     * @return the {@code FileResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public FileResult makeDirectory(String cardPath) throws IOException {
         Response response = mCard.createPath(cardPath);
         return new FileResult(response);
@@ -70,14 +140,33 @@ public class GKFileActions {
 
     private final Pattern mFilePattern = Pattern.compile("([-d])\\S+(\\S+\\s+){8}(.*)$");
 
+    /**
+     * ListFilesResult encapsulates the result of the "List Files" action.
+     */
     public class ListFilesResult extends FileResult {
+        /**
+         * The list of files retrieved from the GateKeeper Card.
+         */
         protected final List<GKFile> mFiles;
 
+        /**
+         * Create a {@code ListFilesResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @param cardPath the path used in the action
+         */
         public ListFilesResult(Response response, String cardPath) {
             super(response);
             mFiles = parseFileList(response.getData(), cardPath);
         }
 
+        /**
+         * Retrieve the files obtained from the GateKeeper Card.
+         *
+         * @return the list of files
+         * @since 0.5.0
+         */
         public List<GKFile> getFiles() {
             return mFiles;
         }
@@ -112,28 +201,69 @@ public class GKFileActions {
         }
     }
 
+    /**
+     * GetFileResult encapsulates the result of the "Get File" action.
+     */
     public class GetFileResult extends FileResult {
+        /**
+         * The file with data retrieved from the GateKeeper Card.
+         */
         protected final File mFile;
 
+        /**
+         * Create a {@code GetFileResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @param file     the {@code File} storing the retrieved file data
+         */
         public GetFileResult(Response response, File file) {
             super(response);
             mFile = file;
         }
 
+        /**
+         * Retrieve the file storing the retrieved file data
+         *
+         * @return the file storing the retrieved file data
+         */
         public File getFile() {
             return mFile;
         }
     }
 
+    /**
+     * FileResult encapsulates the result of basic file actions.
+     */
     public class FileResult {
+        /**
+         * The {@code Response} received from the GateKeeper Card.
+         */
         protected final Response mResponse;
+
+        /**
+         * The {@code Status} of the action.
+         */
         protected final Status mStatus;
 
+        /**
+         * Create an {@code FileResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @since 0.5.0
+         */
         public FileResult(Response response) {
             mResponse = response;
             mStatus = parseResponseStatus(response);
         }
 
+        /**
+         * Retrieve the {@code Status} describing the {@code FileResult}.
+         *
+         * @return the {@code Status} of the {@code FileResult}
+         * @since 0.5.0
+         */
         public Status getStatus() {
             return mStatus;
         }

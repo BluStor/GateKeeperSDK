@@ -11,6 +11,9 @@ import co.blustor.gatekeeper.biometrics.GKFaces;
 import co.blustor.gatekeeper.devices.GKCard;
 import co.blustor.gatekeeper.devices.GKCard.Response;
 
+/**
+ * GKAuthentication is a Service for using facial authentication with the GateKeeper Card.
+ */
 public class GKAuthentication {
     public static final String TAG = GKAuthentication.class.getSimpleName();
 
@@ -20,29 +23,95 @@ public class GKAuthentication {
     public static final String REVOKE_FACE_PATH_PREFIX = "/auth/face00";
     public static final String LIST_FACE_PATH = "/auth";
 
+    /**
+     * Status is the named result of an action.
+     */
     public enum Status {
+        /**
+         * The action was successful.
+         */
         SUCCESS,
+
+        /**
+         * The given template data was successfully stored on the GateKeeper Card.
+         */
         TEMPLATE_ADDED,
+
+        /**
+         * The client has successfully started a session on the GateKeeper Card.
+         */
         SIGNED_IN,
+
+        /**
+         * The client has ended the current session on the GateKeeper Card.
+         */
         SIGNED_OUT,
+
+        /**
+         * The client did not successfully start a session on the GateKeeper Card.
+         */
         SIGN_IN_FAILURE,
+
+        /**
+         * The client is not currently Authenticated with the GateKeeper Card.
+         */
         UNAUTHORIZED,
+
+        /**
+         * The given template data was not acceptable.
+         */
         BAD_TEMPLATE,
+
+        /**
+         * The target path of the action could not be found.
+         */
         NOT_FOUND,
+
+        /**
+         * The action was terminated by request.
+         */
         CANCELED,
+
+        /**
+         * The GateKeeper Card API returned a result that GKAuthentication does
+         * not understand.
+         */
         UNKNOWN_STATUS
     }
 
     protected final GKCard mCard;
 
+    /**
+     * Create a {@code GKAuthentication} that communicates with {@code card}.
+     *
+     * @param card the {@code GKCard} to be used with facial authentication actions
+     * @since 0.5.0
+     */
     public GKAuthentication(GKCard card) {
         mCard = card;
     }
 
+    /**
+     * Store a {@code Template} at the first template index on the GateKeeper Card.
+     *
+     * @param template the {@code Template} to be stored
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult enrollWithFace(GKFaces.Template template) throws IOException {
         return enrollWithFace(template, 0);
     }
 
+    /**
+     * Store a {@code Template} at the given template index on the GateKeeper Card.
+     *
+     * @param template   the {@code Template} to be stored
+     * @param templateId the index at which to store the {@code template}
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult enrollWithFace(GKFaces.Template template, int templateId) throws IOException {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
@@ -51,6 +120,14 @@ public class GKAuthentication {
         return new AuthResult(response);
     }
 
+    /**
+     * Authenticate with the GateKeeper Card using a {@code Template}.
+     *
+     * @param template the {@code Template} to be submitted for authentication
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult signInWithFace(GKFaces.Template template) throws IOException {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
@@ -59,20 +136,49 @@ public class GKAuthentication {
         return new AuthResult(response);
     }
 
+    /**
+     * End the current session on the GateKeeper Card.
+     *
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult signOut() throws IOException {
         Response response = mCard.delete(SIGN_OUT_PATH);
         return new AuthResult(response);
     }
 
+    /**
+     * Delete the {@code Template} at the first template index on the GateKeeper Card.
+     *
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult revokeFace() throws IOException {
         return revokeFace(0);
     }
 
+    /**
+     * Delete the {@code Template} at the given template index on the GateKeeper Card.
+     *
+     * @param templateId the index at which to delete a {@code template}
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult revokeFace(int templateId) throws IOException {
         Response response = mCard.delete(REVOKE_FACE_PATH_PREFIX + templateId);
         return new AuthResult(response);
     }
 
+    /**
+     * Retrieve the list of templates stored on the GateKeeper Card.
+     *
+     * @return the {@code ListTemplatesResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public ListTemplatesResult listTemplates() throws IOException {
         Response response = mCard.list(LIST_FACE_PATH);
         return new ListTemplatesResult(response);
@@ -123,16 +229,39 @@ public class GKAuthentication {
         }
     }
 
+    /**
+     * ListTemplatesResult encapsulates the result of the "List Templates" action.
+     */
     public class ListTemplatesResult extends AuthResult {
+        /**
+         * An unknown template is present when the action was performed without having
+         * a valid session established on the GateKeeper Card.
+         */
         public static final String UNKNOWN_TEMPLATE = "UNKNOWN_TEMPLATE";
 
+        /**
+         * The list of templates retrieved from the GateKeeper Card.
+         */
         protected final List<Object> mTemplates;
 
+        /**
+         * Create a {@code ListTemplatesResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @since 0.5.0
+         */
         public ListTemplatesResult(Response response) {
             super(response);
             mTemplates = parseTemplates();
         }
 
+        /**
+         * Retrieve the templates obtained from the GateKeeper Card.
+         *
+         * @return the list of templates
+         * @since 0.5.0
+         */
         public List<Object> getTemplates() {
             return mTemplates;
         }
@@ -156,20 +285,50 @@ public class GKAuthentication {
         }
     }
 
+    /**
+     * AuthResult encapsulates the result of basic authentication actions.
+     */
     public class AuthResult {
+        /**
+         * The {@code Response} received from the GateKeeper Card.
+         */
         protected final Response mResponse;
+
+        /**
+         * The {@code Status} of the action.
+         */
         protected final Status mStatus;
 
+        /**
+         * Create an {@code AuthResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @since 0.5.0
+         */
         public AuthResult(Response response) {
             mResponse = response;
             mStatus = parseResponseStatus(mResponse);
         }
 
+        /**
+         * Create an {@code AuthResult} without a full {@code Response}
+         * from the GateKeeper Card.
+         *
+         * @param status a {@code Status} to describe the {@code AuthResult}
+         * @since 0.5.0
+         */
         public AuthResult(Status status) {
             mResponse = null;
             mStatus = status;
         }
 
+        /**
+         * Retrieve the {@code Status} describing the {@code AuthResult}.
+         *
+         * @return the {@code Status} of the {@code AuthResult}
+         * @since 0.5.0
+         */
         public Status getStatus() {
             return mStatus;
         }
