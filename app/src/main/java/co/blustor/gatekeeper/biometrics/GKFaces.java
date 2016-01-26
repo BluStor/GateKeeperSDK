@@ -14,6 +14,7 @@ import com.neurotec.images.NImage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -28,13 +29,13 @@ public class GKFaces {
     }
 
     public Template createTemplateFromBitmap(Bitmap bitmap) {
-        NSubject subject = new NSubject();
         NImage nImage = NImage.fromBitmap(bitmap);
-        NFace nFace = mBiometricClient.detectFaces(nImage);
-        nFace.setImage(nImage);
-        subject.getFaces().add(nFace);
-        NBiometricStatus status = mBiometricClient.createTemplate(subject);
-        return new Template(subject, status);
+        return createTemplateFromNImage(nImage);
+    }
+
+    public Template createTemplateFromImage(File file) throws IOException {
+        NImage nImage = NImage.fromFile(file.getCanonicalPath());
+        return createTemplateFromNImage(nImage);
     }
 
     public Template createTemplateFromStream(InputStream inputStream) throws IOException {
@@ -46,6 +47,15 @@ public class GKFaces {
         } catch (UnsupportedOperationException e) {
             return new Template(Template.Quality.BAD_DATA);
         }
+    }
+
+    private Template createTemplateFromNImage(NImage nImage) {
+        NSubject subject = new NSubject();
+        NFace nFace = mBiometricClient.detectFaces(nImage);
+        nFace.setImage(nImage);
+        subject.getFaces().add(nFace);
+        NBiometricStatus status = mBiometricClient.createTemplate(subject);
+        return new Template(subject, status);
     }
 
     private byte[] getTemplateBytes(InputStream stream) throws IOException {
