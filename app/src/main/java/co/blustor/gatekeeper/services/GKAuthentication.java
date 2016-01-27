@@ -33,10 +33,10 @@ public class GKAuthentication {
         UNKNOWN_STATUS
     }
 
-    protected final GKCard mGKCard;
+    protected final GKCard mCard;
 
-    public GKAuthentication(GKCard gkCard) {
-        mGKCard = gkCard;
+    public GKAuthentication(GKCard card) {
+        mCard = card;
     }
 
     public AuthResult enrollWithFace(GKFaces.Template template) throws IOException {
@@ -60,7 +60,7 @@ public class GKAuthentication {
     }
 
     public AuthResult signOut() throws IOException {
-        Response response = mGKCard.delete(SIGN_OUT_PATH);
+        Response response = mCard.delete(SIGN_OUT_PATH);
         return new AuthResult(response);
     }
 
@@ -69,12 +69,12 @@ public class GKAuthentication {
     }
 
     public AuthResult revokeFace(int templateId) throws IOException {
-        Response response = mGKCard.delete(REVOKE_FACE_PATH_PREFIX + templateId);
+        Response response = mCard.delete(REVOKE_FACE_PATH_PREFIX + templateId);
         return new AuthResult(response);
     }
 
     public ListTemplatesResult listTemplates() throws IOException {
-        Response response = mGKCard.list(LIST_FACE_PATH);
+        Response response = mCard.list(LIST_FACE_PATH);
         return new ListTemplatesResult(response);
     }
 
@@ -110,14 +110,14 @@ public class GKAuthentication {
     }
 
     private Response submitTemplate(GKFaces.Template template, String cardPath) throws IOException {
-        mGKCard.connect();
+        mCard.connect();
         InputStream inputStream = template.getInputStream();
         try {
-            Response response = mGKCard.put(cardPath, inputStream);
+            Response response = mCard.put(cardPath, inputStream);
             if (response.getStatus() != 226) {
                 return response;
             }
-            return mGKCard.finalize(cardPath);
+            return mCard.finalize(cardPath);
         } finally {
             inputStream.close();
         }
