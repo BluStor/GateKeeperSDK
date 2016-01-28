@@ -7,7 +7,7 @@ To release a build, perform the following steps:
 ### Document Changes
 
 1. Satisfy any pull requests.
-2. Switch to the "releases" branch.
+2. Switch to the "staging" branch.
 3. Ensure that the branch is up-to-date with the "master" branch.
 4. Update `build.gradle` file with the next appropriate Version and Build
    Numbers.
@@ -15,7 +15,6 @@ To release a build, perform the following steps:
 6. Commit Changelog changes with `Release Version <x.x.x>` as the commit
    message.
 7. Merge this branch with master.
-8. Tag the merge commit with `v<x.x.x>` (e.g. `v1.12.9`).
 
 ### Build the SDK
 
@@ -23,8 +22,18 @@ To release a build, perform the following steps:
 2. Locate the `gatekeeper-<x.x.x>.aar` file in the `builds` path.
 3. Archive the `.aar` file with a `.zip` file of the same name (e.g.
    `gatekeeper-1.12.9.aar.zip`).
-4. Upload this file to the [`Builds` folder on Google
-   Drive](https://drive.google.com/a/8thlight.com/folderview?id=0Bz_OswZK4bdqY0xWeUJycFdkR3c&usp=sharing).
+4. Locate the `gatekeeper-<x.x.x>` folder in the `builds` path.
+5. Archive this folder with a `.zip` file of the same name, plus `.docs` before
+   the extension(e.g. `gatekeeper-1.12.9.docs.zip`).
+
+### Creating a Release on Github
+
+1. Draft a new release with `v<x.x.x>` (e.g. `v1.12.9`) as the "Tag Version" and
+   "Release Title."
+2. Set the "Target" to the merge commit for this release on master.
+3. Add any Changelog notes for this release to the Release Description.
+4. Attach the `.aar` and `.docs` archives as binaries.
+5. Publish.
 
 ### Versioning
 
