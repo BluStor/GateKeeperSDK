@@ -34,8 +34,8 @@ public class GKFileActions {
         return new ListFilesResult(response, cardPath);
     }
 
-    public GetFileResult getFile(final GKFile gkFile, File localFile) throws IOException {
-        Response response = mCard.get(gkFile.getCardPath());
+    public GetFileResult getFile(final GKFile file, File localFile) throws IOException {
+        Response response = mCard.get(file.getCardPath());
         GetFileResult result = new GetFileResult(response, localFile);
         if (result.getStatus() == Status.SUCCESS) {
             FileOutputStream outputStream = new FileOutputStream(localFile);
@@ -63,8 +63,8 @@ public class GKFileActions {
         return new FileResult(response);
     }
 
-    public FileResult makeDirectory(String fullPath) throws IOException {
-        Response response = mCard.createPath(fullPath);
+    public FileResult makeDirectory(String cardPath) throws IOException {
+        Response response = mCard.createPath(cardPath);
         return new FileResult(response);
     }
 
