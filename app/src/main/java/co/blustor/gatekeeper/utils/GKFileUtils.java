@@ -2,40 +2,22 @@ package co.blustor.gatekeeper.utils;
 
 import android.support.annotation.NonNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
+/**
+ * GKFileUtils is a functional, static class intended for common operations
+ * involving generic file attributes.
+ */
 public class GKFileUtils {
-    public static final String TAG = GKFileUtils.class.getSimpleName();
-
-    public static final String ROOT = "/";
-
-    public static String joinPath(Object... paths) {
+    /**
+     * Join an array of {@link String} objects using the '/' path separator.
+     *
+     * @param paths the array of {@link String} objects to be joined
+     * @return the array of {@code paths} delimited by '/'
+     */
+    public static String joinPath(String... paths) {
         ArrayList<String> list = nonblankPathSegments(paths);
-        return GKStringUtils.join(list.toArray(), "/").replace("//", "/");
-    }
-
-    public static ArrayList<String> parsePath(String path) {
-        return nonblankPathSegments(path.split("/"));
-    }
-
-    public static void writeStreamToFile(InputStream stream, File file) throws IOException {
-        FileOutputStream output = new FileOutputStream(file.getAbsolutePath());
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-        int len = 0;
-        while ((len = stream.read(buffer)) != -1) {
-            output.write(buffer, 0, len);
-        }
-        if (output != null) {
-            output.close();
-        }
-        if (stream != null) {
-            stream.close();
-        }
+        return GKStringUtils.join(list.toArray(new String[list.size()]), "/").replace("//", "/");
     }
 
     @NonNull

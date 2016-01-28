@@ -13,6 +13,12 @@ import java.io.InputStream;
 
 import co.blustor.gatekeeper.R;
 
+/**
+ * GKEnvironment ensures that the appropriate state is present for GateKeeper biometrics
+ * to perform.
+ *
+ * @since 0.5.0
+ */
 public class GKEnvironment {
     public static final String TAG = GKEnvironment.class.getSimpleName();
 
@@ -25,6 +31,13 @@ public class GKEnvironment {
         mLicensing = new GKLicensing("/local", 5000);
     }
 
+    /**
+     * Retrieve the {@code GKEnvironment} as a Singleton.
+     *
+     * @param context a valid Android {@code Context}
+     * @return the {@code GKEnvironment} Singleton
+     * @since 0.5.0
+     */
     public static GKEnvironment getInstance(Context context) {
         if (mInstance == null) {
             mInstance = new GKEnvironment(context);
@@ -32,6 +45,14 @@ public class GKEnvironment {
         return mInstance;
     }
 
+    /**
+     * Begin establishing the state required by GateKeeper biometrics.
+     *
+     * @param listener an {@code InitializationListener} to be notified
+     *                 upon successful initialization
+     * @return the {@code AsyncTask} performing the initialization
+     * @since 0.5.0
+     */
     public AsyncTask<Void, Void, Void> initialize(final InitializationListener listener) {
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
@@ -52,6 +73,12 @@ public class GKEnvironment {
         return asyncTask;
     }
 
+    /**
+     * An InitializationListener will be notified when GateKeeper biometrics are ready
+     * to be used.
+     *
+     * @since 0.5.0
+     */
     public interface InitializationListener {
         void onLicensesObtained();
     }

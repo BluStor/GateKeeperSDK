@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.6.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.6.1)
+
+* `GKStringUtils.join()` now takes an array of String objects.
+* Javadocs have been created.
+* Build instructions have been updated.
+
 ## [v0.6.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.6.0)
 
 * Templates can be created from image File objects.
@@ -16,6 +22,7 @@
 
 | SDK Version | Firmware Version |
 | :---------: | :--------------: |
+| 0.6.1 | 2.0 |
 | 0.6.0 | 2.0 |
 | 0.5.1 | 2.0 |
 | 0.5.0 | 2.0 |

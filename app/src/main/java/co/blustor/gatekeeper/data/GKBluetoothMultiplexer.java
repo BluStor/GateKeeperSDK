@@ -14,6 +14,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import co.blustor.gatekeeper.devices.GKCard;
 
+/**
+ * Intended for internal use only.
+ */
 public class GKBluetoothMultiplexer {
     public static final String TAG = GKBluetoothMultiplexer.class.getSimpleName();
 

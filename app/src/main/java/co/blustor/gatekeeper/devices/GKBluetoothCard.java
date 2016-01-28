@@ -41,6 +41,12 @@ public class GKBluetoothCard implements GKCard {
 
     private GKCard.ConnectionState mConnectionState = GKCard.ConnectionState.DISCONNECTED;
 
+    /**
+     * Create a {@code GKBluetoothCard} to connect with the GateKeeper Card having the
+     * given name.
+     *
+     * @param cardName the Bluetooth pairing name of the GateKeeper Card
+     */
     public GKBluetoothCard(String cardName) {
         mCardName = cardName;
     }

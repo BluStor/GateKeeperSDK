@@ -1,1 +1,1 @@
-./gradlew clean assembleRelease
+./gradlew clean assembleRelease generateReleaseJavadoc
