@@ -17,6 +17,7 @@ import co.blustor.gatekeeper.devices.GKCard.Response;
 public class GKAuthentication {
     public static final String TAG = GKAuthentication.class.getSimpleName();
 
+    public static final String AUTH_ENROLL_PIN = "auth/enroll/pin";
     public static final String SIGN_IN_PATH = "/auth/signin";
     public static final String SIGN_OUT_PATH = "/auth/signout";
     public static final String ENROLL_FACE_PATH_PREFIX = "/auth/face00";
@@ -157,6 +158,17 @@ public class GKAuthentication {
      */
     public AuthResult revokeFace() throws IOException {
         return revokeFace(0);
+    }
+
+    /**
+     * Delete the PIN on the GateKeeper Card.
+     *
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.6.1
+     */
+    public AuthResult revokePin() throws IOException {
+        return new AuthResult(mCard.delete(AUTH_ENROLL_PIN));
     }
 
     /**
