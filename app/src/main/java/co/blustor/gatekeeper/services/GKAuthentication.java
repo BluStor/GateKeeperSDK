@@ -1,7 +1,9 @@
 package co.blustor.gatekeeper.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -20,6 +22,7 @@ public class GKAuthentication {
     public static final String AUTH_ENROLL_PIN = "auth/enroll/pin";
     public static final String SIGN_IN_PATH = "/auth/signin";
     public static final String SIGN_OUT_PATH = "/auth/signout";
+    public static final String SIGN_IN_PIN_PATH = "/auth/signin/pin";
     public static final String ENROLL_FACE_PATH_PREFIX = "/auth/face00";
     public static final String REVOKE_FACE_PATH_PREFIX = "/auth/face00";
     public static final String LIST_FACE_PATH = "/auth";
@@ -104,6 +107,11 @@ public class GKAuthentication {
         return enrollWithFace(template, 0);
     }
 
+    public AuthResult enrollWithPin(String pin) throws IOException {
+        ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
+        return submitInputStream(inputStream, AUTH_ENROLL_PIN);
+    }
+
     /**
      * Store a {@code Template} at the given template index on the GateKeeper Card.
      *
@@ -117,8 +125,7 @@ public class GKAuthentication {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
-        Response response = submitTemplate(template, ENROLL_FACE_PATH_PREFIX + templateId);
-        return new AuthResult(response);
+        return submitTemplate(template, ENROLL_FACE_PATH_PREFIX + templateId);
     }
 
     /**
@@ -133,8 +140,17 @@ public class GKAuthentication {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
-        Response response = submitTemplate(template, SIGN_IN_PATH);
-        return new AuthResult(response);
+        return submitTemplate(template, SIGN_IN_PATH);
+    }
+
+    public AuthResult signInWithPin(String pin) throws IOException {
+        ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
+        return submitInputStream(inputStream, SIGN_IN_PIN_PATH);
+    }
+
+    private ByteArrayInputStream getInputStreamWithBytes(String s) {
+        byte[] bytes = s.getBytes(Charset.defaultCharset());
+        return new ByteArrayInputStream(bytes);
     }
 
     /**
@@ -227,15 +243,19 @@ public class GKAuthentication {
         return templateList;
     }
 
-    private Response submitTemplate(GKFaces.Template template, String cardPath) throws IOException {
-        mCard.connect();
+    private AuthResult submitTemplate(GKFaces.Template template, String cardPath) throws IOException {
         InputStream inputStream = template.getInputStream();
+        return submitInputStream(inputStream, cardPath);
+    }
+
+    private AuthResult submitInputStream(InputStream inputStream, String cardPath) throws IOException {
         try {
+            mCard.connect();
             Response response = mCard.put(cardPath, inputStream);
             if (response.getStatus() != 226) {
-                return response;
+                return new AuthResult(response);
             }
-            return mCard.finalize(cardPath);
+            return new AuthResult(mCard.finalize(cardPath));
         } finally {
             inputStream.close();
         }
