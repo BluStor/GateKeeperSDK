@@ -143,6 +143,14 @@ public class GKAuthentication {
         return submitTemplate(template, SIGN_IN_FACE_PATH);
     }
 
+    /**
+     * Authenticate with the GateKeeper Card using a {@code PIN}.
+     *
+     * @param pin the {@code PIN} to be submitted for authentication
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
     public AuthResult signInWithPin(String pin) throws IOException {
         ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
         return submitInputStream(inputStream, SIGN_IN_PIN_PATH);
