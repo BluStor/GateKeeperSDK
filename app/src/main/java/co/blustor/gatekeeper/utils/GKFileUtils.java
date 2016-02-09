@@ -13,7 +13,7 @@ public class GKFileUtils {
     /**
      *  Base path of the card
      */
-    public static final String ROOT = "/";
+    public static final String ROOT = "/data";
 
     /**
      * Join an array of {@link String} objects using the '/' path separator.
