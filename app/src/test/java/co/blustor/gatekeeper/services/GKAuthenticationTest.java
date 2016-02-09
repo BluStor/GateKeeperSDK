@@ -2,12 +2,16 @@ package co.blustor.gatekeeper.services;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import co.blustor.gatekeeper.devices.GKCard;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -75,5 +79,32 @@ public class GKAuthenticationTest {
 
         verify(fakeCard).finalize(GKAuthentication.SIGN_IN_PIN_PATH);
         assertThat(result.getStatus(), is(equalTo(GKAuthentication.Status.SUCCESS)));
+    }
+
+    @Test
+    public void returnsUnknownTemplateWhenNotAuthenticated() throws IOException {
+        when(fakeCard.list(GKAuthentication.LIST_FACE_PATH))
+                .thenReturn(new GKCard.Response(530, "Unauthorized"));
+        GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listTemplates();
+        assertThat(listTemplatesResult.getTemplates(), hasItem(equalTo(GKAuthentication.ListTemplatesResult.UNKNOWN_TEMPLATE)));
+    }
+
+    @Test
+    public void listTemplatesResultReturnsAllTemplates() throws IOException {
+        GKCard.Response fakeResponse = mock(GKCard.Response.class);
+        String data = "-rw-rw-rw-   1 root  root       4026 Dec 16  2015 1\r\n";
+        when(fakeResponse.getData()).thenReturn(data.getBytes(StandardCharsets.UTF_8));
+        when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
+        GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listTemplates();
+        assertThat(listTemplatesResult.getTemplates(), hasItem(equalTo("1")));
+    }
+
+    @Test
+    public void returnsEmptyListWhenGetDataIsNull() throws IOException {
+        GKCard.Response fakeResponse = mock(GKCard.Response.class);
+        when(fakeResponse.getData()).thenReturn(null);
+        when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
+        GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listTemplates();
+        assertThat(listTemplatesResult.getTemplates(), is(empty()));
     }
 }

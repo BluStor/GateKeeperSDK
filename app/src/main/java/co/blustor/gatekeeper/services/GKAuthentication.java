@@ -20,12 +20,12 @@ public class GKAuthentication {
     public static final String TAG = GKAuthentication.class.getSimpleName();
 
     public static final String AUTH_ENROLL_PIN = "auth/enroll/pin";
-    public static final String SIGN_IN_PATH = "/auth/signin";
+    public static final String SIGN_IN_FACE_PATH = "/auth/signin/face";
     public static final String SIGN_OUT_PATH = "/auth/signout";
     public static final String SIGN_IN_PIN_PATH = "/auth/signin/pin";
-    public static final String ENROLL_FACE_PATH_PREFIX = "/auth/face00";
-    public static final String REVOKE_FACE_PATH_PREFIX = "/auth/face00";
-    public static final String LIST_FACE_PATH = "/auth";
+    public static final String ENROLL_FACE_PATH_PREFIX = "/auth/enroll/face/";
+    public static final String REVOKE_FACE_PATH_PREFIX = "/auth/enroll/face/";
+    public static final String LIST_FACE_PATH = "/auth/enroll/face";
 
     /**
      * Status is the named result of an action.
@@ -140,7 +140,7 @@ public class GKAuthentication {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
-        return submitTemplate(template, SIGN_IN_PATH);
+        return submitTemplate(template, SIGN_IN_FACE_PATH);
     }
 
     public AuthResult signInWithPin(String pin) throws IOException {
@@ -308,9 +308,7 @@ public class GKAuthentication {
                 }
                 List<String> templates = parseTemplateList(mResponse.getData());
                 for (String template : templates) {
-                    if (template.startsWith("face")) {
-                        list.add(template);
-                    }
+                    list.add(template);
                 }
             }
             return list;
