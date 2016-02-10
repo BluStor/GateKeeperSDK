@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import com.neurotec.biometrics.NBiometric;
 import com.neurotec.biometrics.NBiometricCaptureOption;
 import com.neurotec.biometrics.NBiometricOperation;
 import com.neurotec.biometrics.NBiometricStatus;
@@ -23,6 +24,8 @@ import com.neurotec.devices.NDeviceType;
 import com.neurotec.images.NImage;
 import com.neurotec.util.concurrent.CompletionHandler;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -109,6 +112,14 @@ public class GKFaces {
     private void startCapturing(NFaceView nFaceView, final OnCameraCompletionListener listener) {
         NSubject nSubject = new NSubject();
         NFace nFace = new NFace();
+        nFace.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent event) {
+                if ("Status".equals(event.getPropertyName())) {
+                    ((NBiometric) event.getSource()).getStatus();
+                }
+            }
+        });
         EnumSet<NBiometricCaptureOption> options = EnumSet.of(NBiometricCaptureOption.MANUAL);
         options.add(NBiometricCaptureOption.STREAM);
         setFrontFaceCamera();
