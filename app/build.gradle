@@ -36,7 +36,7 @@ android {
         variant.outputs.each { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.aar')) {
-                output.outputFile = new File("./builds/gatekeeper-${defaultConfig.versionName}.aar")
+                output.outputFile = new File("./builds/gatekeepersdk-${defaultConfig.versionName}.aar")
             }
         }
     }
@@ -48,7 +48,7 @@ afterEvaluate {
             title = rootProject.name
             source = variant.javaCompile.source
             ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-            destinationDir = file("${getRootDir()}/builds/gatekeeper-${android.defaultConfig.versionName}/")
+            destinationDir = file("${getRootDir()}/builds/gatekeepersdk-${android.defaultConfig.versionName}/")
             classpath += files(variant.javaCompile.classpath.files) + files(ext.androidJar)
             classpath += files(getBuildDir())
             options.links("http://docs.oracle.com/javase/7/docs/api/");
@@ -60,8 +60,8 @@ afterEvaluate {
 }
 
 clean.dependsOn project.task("deleteCurrentBuilds", type: Delete) {
-    delete "${getRootDir()}/builds/gatekeeper-${android.defaultConfig.versionName}.aar"
-    delete "${getRootDir()}/builds/gatekeeper-${android.defaultConfig.versionName}/"
+    delete "${getRootDir()}/builds/gatekeepersdk-${android.defaultConfig.versionName}.aar"
+    delete "${getRootDir()}/builds/gatekeepersdk-${android.defaultConfig.versionName}/"
 }
 
 dependencies {

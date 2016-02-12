@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.services;
+package co.blustor.gatekeepersdk.services;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import co.blustor.gatekeeper.biometrics.GKFaces;
-import co.blustor.gatekeeper.devices.GKCard;
-import co.blustor.gatekeeper.devices.GKCard.Response;
+import co.blustor.gatekeepersdk.biometrics.GKFaces;
+import co.blustor.gatekeepersdk.devices.GKCard;
+import co.blustor.gatekeepersdk.devices.GKCard.Response;
 
 /**
  * GKAuthentication is a Service for using facial authentication with the GateKeeper Card.

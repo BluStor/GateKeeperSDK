@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.biometrics;
+package co.blustor.gatekeepersdk.biometrics;
 
 import android.content.Context;
 import android.graphics.Bitmap;
