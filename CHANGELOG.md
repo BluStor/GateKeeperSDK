@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.7.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.7.0)
+
+* Add SDK methods for enrolling, signing in, and revoking with PIN templates
+* Update routes for firmware versions 3.0/4.0 (no functional change between 3.0 and 4.0)
+
 ## [v0.6.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.6.1)
 
 * `GKStringUtils.join()` now takes an array of String objects.
@@ -22,6 +27,7 @@
 
 | SDK Version | Firmware Version |
 | :---------: | :--------------: |
+| 0.7.0 | 4.0 |
 | 0.6.1 | 2.0 |
 | 0.6.0 | 2.0 |
 | 0.5.1 | 2.0 |
