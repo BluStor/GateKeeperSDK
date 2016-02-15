@@ -9,6 +9,12 @@ import java.util.ArrayList;
  * involving generic file attributes.
  */
 public class GKFileUtils {
+
+    /**
+     *  Base path of the card
+     */
+    public static final String ROOT = "/data";
+
     /**
      * Join an array of {@link String} objects using the '/' path separator.
      *
@@ -18,6 +24,16 @@ public class GKFileUtils {
     public static String joinPath(String... paths) {
         ArrayList<String> list = nonblankPathSegments(paths);
         return GKStringUtils.join(list.toArray(new String[list.size()]), "/").replace("//", "/");
+    }
+
+    /**
+     * Parse path into an ArrayList using the '/' path separator.
+     *
+     * @param path the string to be split into the ArrayList
+     * @return the array of path segments
+     */
+    public static ArrayList<String> parsePath(String path) {
+        return nonblankPathSegments(path.split("/"));
     }
 
     @NonNull

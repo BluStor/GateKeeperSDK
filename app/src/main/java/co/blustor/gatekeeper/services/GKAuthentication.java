@@ -1,7 +1,9 @@
 package co.blustor.gatekeeper.services;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,11 +19,13 @@ import co.blustor.gatekeeper.devices.GKCard.Response;
 public class GKAuthentication {
     public static final String TAG = GKAuthentication.class.getSimpleName();
 
-    public static final String SIGN_IN_PATH = "/auth/signin";
+    public static final String AUTH_ENROLL_PIN = "auth/enroll/pin";
+    public static final String SIGN_IN_FACE_PATH = "/auth/signin/face";
     public static final String SIGN_OUT_PATH = "/auth/signout";
-    public static final String ENROLL_FACE_PATH_PREFIX = "/auth/face00";
-    public static final String REVOKE_FACE_PATH_PREFIX = "/auth/face00";
-    public static final String LIST_FACE_PATH = "/auth";
+    public static final String SIGN_IN_PIN_PATH = "/auth/signin/pin";
+    public static final String ENROLL_FACE_PATH_PREFIX = "/auth/enroll/face/";
+    public static final String REVOKE_FACE_PATH_PREFIX = "/auth/enroll/face/";
+    public static final String LIST_FACE_PATH = "/auth/enroll/face";
 
     /**
      * Status is the named result of an action.
@@ -103,6 +107,11 @@ public class GKAuthentication {
         return enrollWithFace(template, 0);
     }
 
+    public AuthResult enrollWithPin(String pin) throws IOException {
+        ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
+        return submitInputStream(inputStream, AUTH_ENROLL_PIN);
+    }
+
     /**
      * Store a {@code Template} at the given template index on the GateKeeper Card.
      *
@@ -116,8 +125,7 @@ public class GKAuthentication {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
-        Response response = submitTemplate(template, ENROLL_FACE_PATH_PREFIX + templateId);
-        return new AuthResult(response);
+        return submitTemplate(template, ENROLL_FACE_PATH_PREFIX + templateId);
     }
 
     /**
@@ -132,8 +140,25 @@ public class GKAuthentication {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
-        Response response = submitTemplate(template, SIGN_IN_PATH);
-        return new AuthResult(response);
+        return submitTemplate(template, SIGN_IN_FACE_PATH);
+    }
+
+    /**
+     * Authenticate with the GateKeeper Card using a {@code PIN}.
+     *
+     * @param pin the {@code PIN} to be submitted for authentication
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
+    public AuthResult signInWithPin(String pin) throws IOException {
+        ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
+        return submitInputStream(inputStream, SIGN_IN_PIN_PATH);
+    }
+
+    private ByteArrayInputStream getInputStreamWithBytes(String s) {
+        byte[] bytes = s.getBytes(Charset.defaultCharset());
+        return new ByteArrayInputStream(bytes);
     }
 
     /**
@@ -157,6 +182,17 @@ public class GKAuthentication {
      */
     public AuthResult revokeFace() throws IOException {
         return revokeFace(0);
+    }
+
+    /**
+     * Delete the PIN on the GateKeeper Card.
+     *
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.6.1
+     */
+    public AuthResult revokePin() throws IOException {
+        return new AuthResult(mCard.delete(AUTH_ENROLL_PIN));
     }
 
     /**
@@ -215,15 +251,19 @@ public class GKAuthentication {
         return templateList;
     }
 
-    private Response submitTemplate(GKFaces.Template template, String cardPath) throws IOException {
-        mCard.connect();
+    private AuthResult submitTemplate(GKFaces.Template template, String cardPath) throws IOException {
         InputStream inputStream = template.getInputStream();
+        return submitInputStream(inputStream, cardPath);
+    }
+
+    private AuthResult submitInputStream(InputStream inputStream, String cardPath) throws IOException {
         try {
+            mCard.connect();
             Response response = mCard.put(cardPath, inputStream);
             if (response.getStatus() != 226) {
-                return response;
+                return new AuthResult(response);
             }
-            return mCard.finalize(cardPath);
+            return new AuthResult(mCard.finalize(cardPath));
         } finally {
             inputStream.close();
         }
@@ -276,9 +316,7 @@ public class GKAuthentication {
                 }
                 List<String> templates = parseTemplateList(mResponse.getData());
                 for (String template : templates) {
-                    if (template.startsWith("face")) {
-                        list.add(template);
-                    }
+                    list.add(template);
                 }
             }
             return list;
