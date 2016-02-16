@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.utils;
+package co.blustor.gatekeepersdk.utils;
 
 /**
  * GKStringUtils is a functional, static class intended for common operations
