@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.biometrics;
+package co.blustor.gatekeepersdk.biometrics;
 
 import com.neurotec.licensing.NLicense;
 

@@ -19,12 +19,12 @@ To release a build, perform the following steps:
 ### Build the SDK
 
 1. Run `bin/build.sh` from the project root path.
-2. Locate the `gatekeeper-<x.x.x>.aar` file in the `builds` path.
+2. Locate the `gatekeepersdk-<x.x.x>.aar` file in the `builds` path.
 3. Archive the `.aar` file with a `.zip` file of the same name (e.g.
-   `gatekeeper-1.12.9.aar.zip`).
-4. Locate the `gatekeeper-<x.x.x>` folder in the `builds` path.
+   `gatekeepersdk-1.12.9.aar.zip`).
+4. Locate the `gatekeepersdk-<x.x.x>` folder in the `builds` path.
 5. Archive this folder with a `.zip` file of the same name, plus `.docs` before
-   the extension(e.g. `gatekeeper-1.12.9.docs.zip`).
+   the extension(e.g. `gatekeepersdk-1.12.9.docs.zip`).
 
 ### Creating a Release on Github
 

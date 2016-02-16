@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.services;
+package co.blustor.gatekeepersdk.services;
 
 import org.junit.Test;
 
@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import co.blustor.gatekeeper.devices.GKCard;
+import co.blustor.gatekeepersdk.devices.GKCard;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;

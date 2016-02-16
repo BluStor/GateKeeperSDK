@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.devices;
+package co.blustor.gatekeepersdk.devices;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import co.blustor.gatekeeper.data.GKBluetoothMultiplexer;
-import co.blustor.gatekeeper.utils.GKStringUtils;
+import co.blustor.gatekeepersdk.data.GKBluetoothMultiplexer;
+import co.blustor.gatekeepersdk.utils.GKStringUtils;
 
 public class GKBluetoothCard implements GKCard {
     public static final String TAG = GKBluetoothCard.class.getSimpleName();

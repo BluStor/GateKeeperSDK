@@ -1,6 +1,6 @@
-package co.blustor.gatekeeper.data;
+package co.blustor.gatekeepersdk.data;
 
-import co.blustor.gatekeeper.utils.GKFileUtils;
+import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
  * A GKFile represents a file or path on a GateKeeper Card.
