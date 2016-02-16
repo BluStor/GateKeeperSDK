@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.devices;
+package co.blustor.gatekeepersdk.devices;
 
 import java.io.IOException;
 import java.io.InputStream;

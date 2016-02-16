@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.biometrics;
+package co.blustor.gatekeepersdk.biometrics;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -11,7 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import co.blustor.gatekeeper.R;
+import co.blustor.gatekeepersdk.R;
 
 /**
  * GKEnvironment ensures that the appropriate state is present for GateKeeper biometrics
