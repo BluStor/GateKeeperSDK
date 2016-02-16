@@ -1,10 +1,10 @@
-package co.blustor.gatekeeper.services;
+package co.blustor.gatekeepersdk.services;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import co.blustor.gatekeeper.devices.GKCard;
-import co.blustor.gatekeeper.devices.GKCard.Response;
+import co.blustor.gatekeepersdk.devices.GKCard;
+import co.blustor.gatekeepersdk.devices.GKCard.Response;
 
 /**
  * GKCardSettings is a Service for handling GateKeeper Card configuration data.

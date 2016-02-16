@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.8.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.8.0)
+
+* Rename packages to `co.blustor.gatekeepersdk`
+
 ## [v0.7.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.7.0)
 
 * Add SDK methods for enrolling, signing in, and revoking with PIN templates

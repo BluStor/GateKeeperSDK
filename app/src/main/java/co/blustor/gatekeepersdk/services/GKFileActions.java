@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.services;
+package co.blustor.gatekeepersdk.services;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import co.blustor.gatekeeper.data.GKFile;
-import co.blustor.gatekeeper.devices.GKCard;
-import co.blustor.gatekeeper.devices.GKCard.Response;
+import co.blustor.gatekeepersdk.data.GKFile;
+import co.blustor.gatekeepersdk.devices.GKCard;
+import co.blustor.gatekeepersdk.devices.GKCard.Response;
 
 /**
  * GKFileActions is a Service for handling file data with the GateKeeper Card.
