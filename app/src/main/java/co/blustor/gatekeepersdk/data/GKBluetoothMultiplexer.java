@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.data;
+package co.blustor.gatekeepersdk.data;
 
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import co.blustor.gatekeeper.devices.GKCard;
+import co.blustor.gatekeepersdk.devices.GKCard;
 
 /**
  * Intended for internal use only.

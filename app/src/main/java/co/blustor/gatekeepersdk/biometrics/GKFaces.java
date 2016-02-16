@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.biometrics;
+package co.blustor.gatekeepersdk.biometrics;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;

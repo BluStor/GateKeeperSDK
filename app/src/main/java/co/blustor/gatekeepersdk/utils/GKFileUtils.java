@@ -1,4 +1,4 @@
-package co.blustor.gatekeeper.utils;
+package co.blustor.gatekeepersdk.utils;
 
 import android.support.annotation.NonNull;
 
