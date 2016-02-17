@@ -22,7 +22,7 @@ import java.nio.ByteBuffer;
 /**
  * GKFaces is a Service for handling facial biometrics.
  */
-public class GKFaces {
+public class GKFaces implements GKBiometricClient {
     private final NBiometricClient mBiometricClient;
 
     /**
