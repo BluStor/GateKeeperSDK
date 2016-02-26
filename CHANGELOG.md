@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.9.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.9.0)
+
+* Rename `GKAuthentication.listTemplates` to `GKAuthentication.listFaceTemplates`
+* Add `GKAuthentication.listPinTemplates`
+* Make `GKAuthentication.AuthResult` static
+* Call `GKCard.connect` before every service call
+
 ## [v0.8.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.8.0)
 
 * Rename packages to `co.blustor.gatekeepersdk`
