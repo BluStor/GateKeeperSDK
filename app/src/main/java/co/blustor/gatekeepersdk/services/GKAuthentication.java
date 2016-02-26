@@ -155,7 +155,7 @@ public class GKAuthentication {
      *
      * @return the {@code ListTemplatesResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
-     * @since 0.8.1
+     * @since 0.9.0
      */
     public ListTemplatesResult listFaceTemplates() throws IOException {
         mCard.connect();
@@ -168,7 +168,7 @@ public class GKAuthentication {
      *
      * @return the {@code ListTemplatesResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
-     * @since 0.8.1
+     * @since 0.9.0
      */
     public ListTemplatesResult listPinTemplates() throws IOException {
         mCard.connect();
@@ -366,7 +366,7 @@ public class GKAuthentication {
          *
          * @param response  the {@code Response} received from the GateKeeper Card
          * @param templates the List of templates received from the GateKeeper Card
-         * @since 0.8.1
+         * @since 0.9.0
          */
         public ListTemplatesResult(Response response, List<Object> templates) {
             super(response);
