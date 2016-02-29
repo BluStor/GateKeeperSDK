@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.10.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.10.0)
+
+* Rename `GKAuthentication.enrollWithPin` to `GKAuthentication.enrollWithRecoveryCode`
+* Rename `GKAuthentication.signInWithPin` to `GKAuthentication.signInWithRecoveryCode`
+* Rename `GKAuthentication.revokePin` to `GKAuthentication.revokeRecoveryCode`
+* Rename `GKAuthentication.listPinTemplates` to `GKAuthentication.listRecoveryCodeTemplates`
+* Add `GKCardSettings.getFirmwareInformation`
+* Update recovery code request paths to match firmware version 5.0
+
 ## [v0.9.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.9.0)
 
 * Rename `GKAuthentication.listTemplates` to `GKAuthentication.listFaceTemplates`
@@ -38,6 +47,9 @@
 
 | SDK Version | Firmware Version |
 | :---------: | :--------------: |
+| 0.10.0 | 5.0 |
+| 0.9.0 | 4.0 |
+| 0.8.0 | 4.0 |
 | 0.7.0 | 4.0 |
 | 0.6.1 | 2.0 |
 | 0.6.0 | 2.0 |
