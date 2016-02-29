@@ -26,58 +26,58 @@ public class GKAuthenticationTest {
     private GKCard fakeCard = mock(GKCard.class);
 
     @Test
-    public void revokePinRetunsSuccessWhenAuthenticatedTest() throws Exception {
-        when(fakeCard.delete(GKAuthentication.AUTH_ENROLL_PIN))
-                .thenReturn(new GKCard.Response(250, "Pin Unset"));
+    public void revokeRecoveryCodeRetunsSuccessWhenAuthenticatedTest() throws Exception {
+        when(fakeCard.delete(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + 1))
+                .thenReturn(new GKCard.Response(250, "RecoveryCode Unset"));
 
-        GKAuthentication.AuthResult auth = new GKAuthentication(fakeCard).revokePin();
+        GKAuthentication.AuthResult auth = new GKAuthentication(fakeCard).revokeRecoveryCode(1);
 
         assertThat(auth.getStatus(), is(equalTo(GKAuthentication.Status.SUCCESS)));
     }
 
     @Test
-    public void revokePinReturnsUnauthenticatedTest() throws Exception {
-        when(fakeCard.delete(GKAuthentication.AUTH_ENROLL_PIN))
+    public void revokeRecoveryCodeReturnsUnauthenticatedTest() throws Exception {
+        when(fakeCard.delete(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + 1))
                 .thenReturn(new GKCard.Response(530, "Unauthorized"));
 
-        GKAuthentication.AuthResult auth = new GKAuthentication(fakeCard).revokePin();
+        GKAuthentication.AuthResult auth = new GKAuthentication(fakeCard).revokeRecoveryCode(1);
 
         assertThat(auth.getStatus(), is(equalTo(GKAuthentication.Status.UNAUTHORIZED)));
     }
 
     @Test
-    public void enrollWithPinReturnsSuccessForSuccessfulPut() throws Exception {
-        when(fakeCard.put(eq(GKAuthentication.AUTH_ENROLL_PIN), any(InputStream.class)))
+    public void enrollWithRecoveryCodeReturnsSuccessForSuccessfulPut() throws Exception {
+        when(fakeCard.put(eq(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + 1), any(InputStream.class)))
                 .thenReturn(new GKCard.Response(226, "success"));
-        when(fakeCard.finalize(GKAuthentication.AUTH_ENROLL_PIN))
+        when(fakeCard.finalize(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + 1))
                 .thenReturn(new GKCard.Response(226, "success"));
 
-        GKAuthentication.AuthResult result = new GKAuthentication(fakeCard).enrollWithPin("1234");
+        GKAuthentication.AuthResult result = new GKAuthentication(fakeCard).enrollWithRecoveryCode("1234", 1);
 
-        verify(fakeCard).finalize(GKAuthentication.AUTH_ENROLL_PIN);
+        verify(fakeCard).finalize(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + 1);
         assertThat(result.getStatus(), is(equalTo(GKAuthentication.Status.SUCCESS)));
     }
 
     @Test
-    public void enrollWithPinReturnsFailureWhenPutResponseStatusIsNot226() throws Exception {
-        when(fakeCard.put(eq(GKAuthentication.AUTH_ENROLL_PIN), any(InputStream.class)))
+    public void enrollWithRecoveryCodeReturnsFailureWhenPutResponseStatusIsNot226() throws Exception {
+        when(fakeCard.put(eq(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + 1), any(InputStream.class)))
                 .thenReturn(new GKCard.Response(426, "success"));
 
-        GKAuthentication.AuthResult result = new GKAuthentication(fakeCard).enrollWithPin("1234");
+        GKAuthentication.AuthResult result = new GKAuthentication(fakeCard).enrollWithRecoveryCode("1234", 1);
 
         assertThat(result.getStatus(), is(equalTo(GKAuthentication.Status.CANCELED)));
     }
 
     @Test
-    public void signInWithPinReturnsSuccessForSuccessfulPut() throws Exception {
-        when(fakeCard.put(eq(GKAuthentication.SIGN_IN_PIN_PATH), any(InputStream.class)))
+    public void signInWithRecoveryCodeReturnsSuccessForSuccessfulPut() throws Exception {
+        when(fakeCard.put(eq(GKAuthentication.SIGN_IN_RECOVERY_CODE_PATH), any(InputStream.class)))
                 .thenReturn(new GKCard.Response(226, "success"));
-        when(fakeCard.finalize(GKAuthentication.SIGN_IN_PIN_PATH))
+        when(fakeCard.finalize(GKAuthentication.SIGN_IN_RECOVERY_CODE_PATH))
                 .thenReturn(new GKCard.Response(226, "success"));
 
-        GKAuthentication.AuthResult result = new GKAuthentication(fakeCard).signInWithPin("1234");
+        GKAuthentication.AuthResult result = new GKAuthentication(fakeCard).signInWithRecoveryCode("1234");
 
-        verify(fakeCard).finalize(GKAuthentication.SIGN_IN_PIN_PATH);
+        verify(fakeCard).finalize(GKAuthentication.SIGN_IN_RECOVERY_CODE_PATH);
         assertThat(result.getStatus(), is(equalTo(GKAuthentication.Status.SUCCESS)));
     }
 

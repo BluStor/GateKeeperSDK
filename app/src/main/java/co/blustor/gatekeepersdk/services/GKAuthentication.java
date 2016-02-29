@@ -19,14 +19,15 @@ import co.blustor.gatekeepersdk.devices.GKCard.Response;
 public class GKAuthentication {
     public static final String TAG = GKAuthentication.class.getSimpleName();
 
-    public static final String AUTH_ENROLL_PIN = "auth/enroll/pin";
-    public static final String SIGN_IN_FACE_PATH = "/auth/signin/face";
-    public static final String SIGN_OUT_PATH = "/auth/signout";
-    public static final String SIGN_IN_PIN_PATH = "/auth/signin/pin";
     public static final String ENROLL_FACE_PATH_PREFIX = "/auth/enroll/face/";
-    public static final String REVOKE_FACE_PATH_PREFIX = "/auth/enroll/face/";
+    public static final String ENROLL_RECOVERY_CODE_PATH_PREFIX = "/auth/enroll/code/";
     public static final String LIST_FACE_PATH = "/auth/enroll/face";
-    public static final String LIST_PIN_PATH = "/auth/enroll/pin";
+    public static final String LIST_RECOVERY_CODE_PATH = "/auth/enroll/code";
+    public static final String REVOKE_FACE_PATH_PREFIX = "/auth/enroll/face/";
+    public static final String REVOKE_RECOVERY_CODE_PATH_PREFIX = "/auth/enroll/code/";
+    public static final String SIGN_IN_FACE_PATH = "/auth/signin/face";
+    public static final String SIGN_IN_RECOVERY_CODE_PATH = "/auth/signin/code";
+    public static final String SIGN_OUT_PATH = "/auth/signout";
     protected final GKCard mCard;
 
     /**
@@ -51,11 +52,6 @@ public class GKAuthentication {
         return enrollWithFace(template, 0);
     }
 
-    public AuthResult enrollWithPin(String pin) throws IOException {
-        ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
-        return submitInputStream(inputStream, AUTH_ENROLL_PIN);
-    }
-
     /**
      * Store a {@code Template} at the given template index on the GateKeeper Card.
      *
@@ -70,6 +66,32 @@ public class GKAuthentication {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
         return submitTemplate(template, ENROLL_FACE_PATH_PREFIX + templateId);
+    }
+
+    /**
+     * Store a recovery code at the first template index on the GateKeeper Card.
+     *
+     * @param recoveryCode the String to be stored
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.10.0
+     */
+    public AuthResult enrollWithRecoveryCode(String recoveryCode) throws IOException {
+        return enrollWithRecoveryCode(recoveryCode, 0);
+    }
+
+    /**
+     * Store a recovery code at the given template index on the GateKeeper Card.
+     *
+     * @param recoveryCode the String to be stored
+     * @param templateId the index at which to store the recovery code
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.10.0
+     */
+    public AuthResult enrollWithRecoveryCode(String recoveryCode, int templateId) throws IOException {
+        ByteArrayInputStream inputStream = getInputStreamWithBytes(recoveryCode);
+        return submitInputStream(inputStream, ENROLL_RECOVERY_CODE_PATH_PREFIX + templateId);
     }
 
     /**
@@ -88,16 +110,16 @@ public class GKAuthentication {
     }
 
     /**
-     * Authenticate with the GateKeeper Card using a {@code PIN}.
+     * Authenticate with the GateKeeper Card using a recovery code.
      *
-     * @param pin the {@code PIN} to be submitted for authentication
+     * @param recoveryCode the String to be submitted for authentication
      * @return the {@code AuthResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.5.0
      */
-    public AuthResult signInWithPin(String pin) throws IOException {
-        ByteArrayInputStream inputStream = getInputStreamWithBytes(pin);
-        return submitInputStream(inputStream, SIGN_IN_PIN_PATH);
+    public AuthResult signInWithRecoveryCode(String recoveryCode) throws IOException {
+        ByteArrayInputStream inputStream = getInputStreamWithBytes(recoveryCode);
+        return submitInputStream(inputStream, SIGN_IN_RECOVERY_CODE_PATH);
     }
 
     /**
@@ -125,18 +147,6 @@ public class GKAuthentication {
     }
 
     /**
-     * Delete the PIN on the GateKeeper Card.
-     *
-     * @return the {@code AuthResult} of the action
-     * @throws IOException when communication with the GateKeeper Card has been disrupted.
-     * @since 0.6.1
-     */
-    public AuthResult revokePin() throws IOException {
-        mCard.connect();
-        return new AuthResult(mCard.delete(AUTH_ENROLL_PIN));
-    }
-
-    /**
      * Delete the {@code Template} at the given template index on the GateKeeper Card.
      *
      * @param templateId the index at which to delete a {@code template}
@@ -148,6 +158,30 @@ public class GKAuthentication {
         mCard.connect();
         Response response = mCard.delete(REVOKE_FACE_PATH_PREFIX + templateId);
         return new AuthResult(response);
+    }
+
+    /**
+     * Delete the recovery code on the GateKeeper Card.
+     *
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.6.1
+     */
+    public AuthResult revokeRecoveryCode() throws IOException {
+        return revokeRecoveryCode(0);
+    }
+
+    /**
+     * Delete the recovery code on the GateKeeper Card.
+     *
+     * @param templateId the index at which to delete a recovery code
+     * @return the {@code AuthResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.6.1
+     */
+    public AuthResult revokeRecoveryCode(int templateId) throws IOException {
+        mCard.connect();
+        return new AuthResult(mCard.delete(REVOKE_RECOVERY_CODE_PATH_PREFIX + templateId));
     }
 
     /**
@@ -164,15 +198,15 @@ public class GKAuthentication {
     }
 
     /**
-     * Retrieve the list of PIN templates stored on the GateKeeper Card.
+     * Retrieve the list of recovery code templates stored on the GateKeeper Card.
      *
      * @return the {@code ListTemplatesResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.9.0
      */
-    public ListTemplatesResult listPinTemplates() throws IOException {
+    public ListTemplatesResult listRecoveryCodeTemplates() throws IOException {
         mCard.connect();
-        Response response = mCard.list(LIST_PIN_PATH);
+        Response response = mCard.list(LIST_RECOVERY_CODE_PATH);
         return new ListTemplatesResult(response);
     }
 
