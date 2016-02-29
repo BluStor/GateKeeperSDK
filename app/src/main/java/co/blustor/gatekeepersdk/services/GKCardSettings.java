@@ -2,6 +2,8 @@ package co.blustor.gatekeepersdk.services;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.devices.GKCard.Response;
@@ -11,31 +13,9 @@ import co.blustor.gatekeepersdk.devices.GKCard.Response;
  */
 public class GKCardSettings {
     private static final String UPDATE_FIRMWARE_PATH = "/device/firmware";
+    private static final String GET_FIRMWARE_INFO_PATH = "/device/firmware";
 
     private final GKCard mCard;
-
-    public enum Status {
-        /**
-         * The action was successful.
-         */
-        SUCCESS,
-
-        /**
-         * The client is not currently Authenticated with the GateKeeper Card.
-         */
-        UNAUTHORIZED,
-
-        /**
-         * The given data was not acceptable.
-         */
-        INVALID_DATA,
-
-        /**
-         * The GateKeeper Card API returned a result that GKCardSettings does
-         * not understand.
-         */
-        UNKNOWN_STATUS
-    }
 
     /**
      * Create a {@code GKCardSettings} that communicates with {@code card}.
@@ -66,9 +46,45 @@ public class GKCardSettings {
     }
 
     /**
+     * Retrieves Firmware data from the GateKeeper Card.
+     *
+     * @return the {@code FirmwareInformationResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.6.0
+     */
+    public FirmwareInformationResult getFirmwareInformation() throws IOException {
+        mCard.connect();
+        Response response = mCard.get(GET_FIRMWARE_INFO_PATH);
+        return new FirmwareInformationResult(response);
+    }
+
+    public enum Status {
+        /**
+         * The action was successful.
+         */
+        SUCCESS,
+
+        /**
+         * The client is not currently Authenticated with the GateKeeper Card.
+         */
+        UNAUTHORIZED,
+
+        /**
+         * The given data was not acceptable.
+         */
+        INVALID_DATA,
+
+        /**
+         * The GateKeeper Card API returned a result that GKCardSettings does
+         * not understand.
+         */
+        UNKNOWN_STATUS
+    }
+
+    /**
      * CardResult encapsulates the result of basic settings actions.
      */
-    public class CardResult {
+    public static class CardResult {
         /**
          * The {@code Response} received from the GateKeeper Card.
          */
@@ -100,18 +116,65 @@ public class GKCardSettings {
         public Status getStatus() {
             return mStatus;
         }
+
+        private Status parseResponseStatus(Response response) {
+            switch (response.getStatus()) {
+                case 213:
+                    return Status.SUCCESS;
+                case 501:
+                    return Status.INVALID_DATA;
+                case 530:
+                    return Status.UNAUTHORIZED;
+                default:
+                    return Status.UNKNOWN_STATUS;
+            }
+        }
     }
 
-    private Status parseResponseStatus(Response response) {
-        switch (response.getStatus()) {
-            case 213:
-                return Status.SUCCESS;
-            case 501:
-                return Status.INVALID_DATA;
-            case 530:
-                return Status.UNAUTHORIZED;
-            default:
-                return Status.UNKNOWN_STATUS;
+    public static class FirmwareInformationResult extends CardResult {
+        private static final String BOOT_VERSION_PATTERN = "BOOT:\\s*(\\S*)";
+        private static final String FIRMWARE_VERSION_PATTERN = "FIRM:\\s*(\\S*)";
+
+        private final String mBootVersion;
+        private final String mFirmwareVersion;
+
+        /**
+         * Create an {@code CardResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         */
+        public FirmwareInformationResult(Response response) {
+            super(response);
+            mBootVersion = parseVersion(BOOT_VERSION_PATTERN);
+            mFirmwareVersion = parseVersion(FIRMWARE_VERSION_PATTERN);
+        }
+
+        /**
+         * Retrieve the bootloader version returned in the {@code Response} from
+         * calling the GateKeeper Card's firmware information endpoint.
+         *
+         * @return the {@code String} of the bootloader version
+         */
+        public String getBootVersion() {
+            return mBootVersion;
+        }
+
+        /**
+         * Retrieve the firmware version returned in the {@code Response} from
+         * calling the GateKeeper Card's firmware information endpoint.
+         *
+         * @return the {@code String} of the firmware version
+         */
+        public String getFirmwareVersion() {
+            return mFirmwareVersion;
+        }
+
+        private String parseVersion(String versionPattern) {
+            String data = new String(mResponse.getData());
+            Pattern pattern = Pattern.compile(versionPattern);
+            Matcher matcher = pattern.matcher(data);
+            return matcher.find() ? matcher.group(1) : null;
         }
     }
 }
