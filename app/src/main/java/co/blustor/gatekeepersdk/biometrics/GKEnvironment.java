@@ -1,7 +1,11 @@
 package co.blustor.gatekeepersdk.biometrics;
 
 import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.neurotec.lang.NCore;
 import com.neurotec.plugins.NDataFileManager;
@@ -12,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import co.blustor.gatekeepersdk.R;
+import co.blustor.gatekeepersdk.services.GKFileActions;
 
 /**
  * GKEnvironment ensures that the appropriate state is present for GateKeeper biometrics
@@ -26,21 +31,22 @@ public class GKEnvironment {
     private final Context mContext;
     private final GKLicensing mLicensing;
 
-    private GKEnvironment(Context context) {
+    private GKEnvironment(Context context, GKFileActions fileActions) {
         mContext = context;
-        mLicensing = new GKLicensing("/local", 5000);
+        mLicensing = buildLicensing(context, fileActions);
     }
 
     /**
      * Retrieve the {@code GKEnvironment} as a Singleton.
      *
-     * @param context a valid Android {@code Context}
+     * @param context     a valid Android {@code Context}
+     * @param fileActions a {@code GKFileActions} to fetch licenses from the card
      * @return the {@code GKEnvironment} Singleton
-     * @since 0.5.0
+     * @since 0.11.0
      */
-    public static GKEnvironment getInstance(Context context) {
+    public static GKEnvironment getInstance(Context context, GKFileActions fileActions) {
         if (mInstance == null) {
-            mInstance = new GKEnvironment(context);
+            mInstance = new GKEnvironment(context, fileActions);
         }
         return mInstance;
     }
@@ -53,34 +59,50 @@ public class GKEnvironment {
      * @return the {@code AsyncTask} performing the initialization
      * @since 0.5.0
      */
-    public AsyncTask<Void, Void, Void> initialize(final InitializationListener listener) {
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+    public AsyncTask<Void, Void, GKLicenseValidationResult> initialize(final InitializationListener listener) {
+        AsyncTask<Void, Void, GKLicenseValidationResult> asyncTask = new AsyncTask<Void, Void, GKLicenseValidationResult>() {
             @Override
-            protected Void doInBackground(Void... params) {
+            protected GKLicenseValidationResult doInBackground(Void... params) {
                 ensureDataFilesExist();
                 NCore.setContext(mContext);
-                mLicensing.obtainLicenses();
-                return null;
+                return mLicensing.obtainLicenses();
             }
 
             @Override
-            protected void onPostExecute(Void v) {
-                super.onPostExecute(v);
-                listener.onLicensesObtained();
+            protected void onPostExecute(GKLicenseValidationResult result) {
+                super.onPostExecute(result);
+                switch (result) {
+                    case SUCCESS:
+                        listener.onLicensesObtained();
+                        break;
+                    case NO_LICENSES_AVAILABLE:
+                        listener.onNoLicensesAvailable();
+                        break;
+                    case VALIDATION_FAILURE:
+                        listener.onLicenseValidationFailure();
+                        break;
+                    case ERROR:
+                        listener.onLicenseValidationError();
+                        break;
+                }
             }
         };
         asyncTask.execute();
         return asyncTask;
     }
 
-    /**
-     * An InitializationListener will be notified when GateKeeper biometrics are ready
-     * to be used.
-     *
-     * @since 0.5.0
-     */
-    public interface InitializationListener {
-        void onLicensesObtained();
+    @NonNull
+    private GKLicensing buildLicensing(Context context, GKFileActions fileActions) {
+        String macAddress = getMacAddress(context);
+        BiometricLicenseManager licenseManager = new BiometricLicenseManager("/local", 5000);
+        return new GKLicensing(macAddress, fileActions, licenseManager);
+    }
+
+    @Nullable
+    private String getMacAddress(Context context) {
+        WifiManager wifiService = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        WifiInfo connectionInfo = wifiService.getConnectionInfo();
+        return connectionInfo == null ? null : connectionInfo.getMacAddress();
     }
 
     private void ensureDataFilesExist() {
@@ -101,5 +123,18 @@ public class GKEnvironment {
             }
         }
         NDataFileManager.getInstance().addFile(facesFile.getAbsolutePath());
+    }
+
+    /**
+     * An InitializationListener will be notified when GateKeeper biometrics are ready
+     * to be used, or if license validation has failed
+     *
+     * @since 0.11.0
+     */
+    public interface InitializationListener {
+        void onLicensesObtained();
+        void onNoLicensesAvailable();
+        void onLicenseValidationFailure();
+        void onLicenseValidationError();
     }
 }

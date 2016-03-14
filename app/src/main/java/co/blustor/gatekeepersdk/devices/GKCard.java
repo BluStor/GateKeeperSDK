@@ -95,6 +95,7 @@ public interface GKCard {
     ConnectionState getConnectionState();
     /**
      * Intended for internal use only.
+     * @param state the {@code ConnectionState} that describes the new state of the connection
      */
     void onConnectionChanged(ConnectionState state);
     /**
@@ -189,7 +190,7 @@ public interface GKCard {
         /**
          * Create a {@code Response} with the basic attributes of the given {@code Response}.
          *
-         * @param response
+         * @param response the {@code Response} object to copy
          * @since 0.5.0
          */
         public Response(Response response) {
