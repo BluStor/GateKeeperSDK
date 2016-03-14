@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import co.blustor.gatekeepersdk.data.GKBluetoothMultiplexer;
+import co.blustor.gatekeepersdk.data.GKMultiplexer;
 import co.blustor.gatekeepersdk.utils.GKStringUtils;
 
 public class GKBluetoothCard implements GKCard {
@@ -33,13 +34,12 @@ public class GKBluetoothCard implements GKCard {
     private static final String RMD = "RMD";
     private static final String SRFT = "SRFT";
 
-    private static final int UPLOAD_DELAY_MILLIS = 1;
-
     private final String mCardName;
-    private GKBluetoothMultiplexer mMultiplexer;
+    private GKMultiplexer mMultiplexer;
     private List<Monitor> mCardMonitors = new ArrayList<>();
 
     private GKCard.ConnectionState mConnectionState = GKCard.ConnectionState.DISCONNECTED;
+    private BluetoothSocket mBluetoothSocket;
 
     /**
      * Create a {@code GKBluetoothCard} to connect with the GateKeeper Card having the
@@ -72,12 +72,7 @@ public class GKBluetoothCard implements GKCard {
                 onConnectionChanged(ConnectionState.CONNECTED);
                 return commandResponse;
             }
-
-            byte[] buffer = new byte[GKBluetoothMultiplexer.MAXIMUM_PAYLOAD_SIZE];
-            while (inputStream.read(buffer, 0, buffer.length) != -1) {
-                mMultiplexer.writeToDataChannel(buffer);
-                Thread.sleep(UPLOAD_DELAY_MILLIS);
-            }
+            mMultiplexer.writeToDataChannel(inputStream);
             Response dataResponse = getCommandResponse();
             onConnectionChanged(ConnectionState.CONNECTED);
             return dataResponse;
@@ -118,9 +113,13 @@ public class GKBluetoothCard implements GKCard {
                 return;
             }
             try {
-                BluetoothSocket socket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUETOOTH_SPP_UUID);
-                mMultiplexer = new GKBluetoothMultiplexer(socket, this);
+                mBluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUETOOTH_SPP_UUID);
+                mBluetoothSocket.connect();
+                InputStream inputStream = mBluetoothSocket.getInputStream();
+                OutputStream outputStream = mBluetoothSocket.getOutputStream();
+                mMultiplexer = new GKMultiplexer(inputStream, outputStream);
                 mMultiplexer.connect();
+                onConnectionChanged(ConnectionState.CONNECTED);
             } catch (IOException e) {
                 mMultiplexer = null;
                 onConnectionChanged(ConnectionState.DISCONNECTED);
@@ -131,6 +130,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public void disconnect() throws IOException {
+        onConnectionChanged(ConnectionState.DISCONNECTING);
         if (mMultiplexer != null) {
             try {
                 mMultiplexer.disconnect();
@@ -138,6 +138,10 @@ public class GKBluetoothCard implements GKCard {
                 mMultiplexer = null;
             }
         }
+        if (mBluetoothSocket != null) {
+            mBluetoothSocket.close();
+        }
+        onConnectionChanged(ConnectionState.DISCONNECTED);
     }
 
     @Override

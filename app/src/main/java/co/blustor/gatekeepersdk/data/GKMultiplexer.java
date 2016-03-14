@@ -1,6 +1,5 @@
 package co.blustor.gatekeepersdk.data;
 
-import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -8,18 +7,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import co.blustor.gatekeepersdk.devices.GKCard;
-
 /**
  * Intended for internal use only.
  */
-public class GKBluetoothMultiplexer {
-    public static final String TAG = GKBluetoothMultiplexer.class.getSimpleName();
-
+public class GKMultiplexer {
+    public static final String TAG = GKMultiplexer.class.getSimpleName();
     public static final int MAXIMUM_PAYLOAD_SIZE = 512;
     public static final int COMMAND_CHANNEL = 1;
     public static final int DATA_CHANNEL = 2;
@@ -28,15 +25,13 @@ public class GKBluetoothMultiplexer {
     private static final byte CARRIAGE_RETURN = 13;
     private static final byte LINE_FEED = 10;
     private static final byte TERMINATE_CHANNEL_BYTE = Byte.MAX_VALUE;
+    private static final int UPLOAD_DELAY_MILLIS = 1;
 
-    private final BluetoothSocket mSocket;
-    private final GKCard mCard;
     private InputStream mInputStream;
     private OutputStream mOutputStream;
     private BlockingQueue<Byte>[] mChannelBuffers = new LinkedBlockingQueue[MAX_CHANNEL_NUMBER + 1];
     private Thread mBufferingThread;
 
-    private GKCard.ConnectionState mConnectionState = GKCard.ConnectionState.DISCONNECTED;
     private boolean mExiting = false;
 
     {
@@ -45,9 +40,9 @@ public class GKBluetoothMultiplexer {
         }
     }
 
-    public GKBluetoothMultiplexer(BluetoothSocket socket, GKCard card) {
-        mSocket = socket;
-        mCard = card;
+    public GKMultiplexer(InputStream inputStream, OutputStream outputStream) {
+        mInputStream = inputStream;
+        mOutputStream = outputStream;
     }
 
     public void writeToCommandChannel(byte[] data) throws IOException {
@@ -56,6 +51,23 @@ public class GKBluetoothMultiplexer {
 
     public void writeToDataChannel(byte[] data) throws IOException {
         write(data, DATA_CHANNEL);
+    }
+
+    public void writeToDataChannel(InputStream inputStream) throws IOException, InterruptedException {
+        int bytesRead;
+        byte[] buffer = new byte[MAXIMUM_PAYLOAD_SIZE];
+        do {
+            bytesRead = inputStream.read(buffer, 0, buffer.length);
+            if (bytesRead == -1) {
+                continue;
+            }
+            if (bytesRead < buffer.length) {
+                writeToDataChannel(Arrays.copyOf(buffer, bytesRead));
+            } else {
+                writeToDataChannel(buffer);
+            }
+            Thread.sleep(UPLOAD_DELAY_MILLIS);
+        } while (bytesRead != -1);
     }
 
     public byte[] readCommandChannelLine() throws IOException, InterruptedException {
@@ -73,22 +85,11 @@ public class GKBluetoothMultiplexer {
     }
 
     public void connect() throws IOException {
-        try {
-            updateConnectionState(GKCard.ConnectionState.CONNECTING);
-            mSocket.connect();
-            mInputStream = mSocket.getInputStream();
-            mOutputStream = mSocket.getOutputStream();
-            mBufferingThread = new Thread(new ChannelBuffer());
-            mBufferingThread.start();
-            updateConnectionState(GKCard.ConnectionState.CONNECTED);
-        } catch (IOException e) {
-            updateConnectionState(GKCard.ConnectionState.DISCONNECTED);
-            throw e;
-        }
+        mBufferingThread = new Thread(new ChannelBuffer());
+        mBufferingThread.start();
     }
 
     public void disconnect() {
-        updateConnectionState(GKCard.ConnectionState.DISCONNECTING);
         mBufferingThread.interrupt();
         cleanup();
     }
@@ -99,15 +100,10 @@ public class GKBluetoothMultiplexer {
             terminateChannelReaders();
             mInputStream.close();
             mOutputStream.close();
-            if (mSocket != null) {
-                mSocket.close();
-            }
         } catch (IOException e) {
             Log.e(TAG, "Exception occurred during cleanup", e);
         } catch (InterruptedException e) {
             Log.e(TAG, "InterruptedException occurred during cleanup", e);
-        } finally {
-            updateConnectionState(GKCard.ConnectionState.DISCONNECTED);
         }
     }
 
@@ -115,13 +111,6 @@ public class GKBluetoothMultiplexer {
         for (int i = 0; i <= MAX_CHANNEL_NUMBER; i++) {
             mChannelBuffers[i].put(TERMINATE_CHANNEL_BYTE);
         }
-    }
-
-    private void updateConnectionState(GKCard.ConnectionState state) {
-        synchronized (mConnectionState) {
-            mConnectionState = state;
-        }
-        mCard.onConnectionChanged(state);
     }
 
     private void write(byte[] data, int channel) throws IOException {
@@ -171,32 +160,6 @@ public class GKBluetoothMultiplexer {
             bytesRead = i;
         }
         return bytesRead + 1;
-    }
-
-    private class ChannelBuffer implements Runnable {
-        public void run() {
-            while (true) {
-                try {
-                    bufferNextPacket();
-                } catch (IOException e) {
-                    Log.e(TAG, "Exception occurred while buffering a DataPacket", e);
-                    cleanup();
-                    return;
-                } catch (InterruptedException e) {
-                    Log.e(TAG, "ChannelBuffer interrupted", e);
-                    return;
-                }
-            }
-        }
-
-        private void bufferNextPacket() throws IOException, InterruptedException {
-            DataPacket packet = DataPacketBuilder.build(mInputStream);
-            BlockingQueue<Byte> buffer = mChannelBuffers[packet.getChannel()];
-            byte[] bytes = packet.getPayload();
-            for (int i = 0; i < bytes.length; i++) {
-                buffer.put(bytes[i]);
-            }
-        }
     }
 
     private static class DataPacket {
@@ -303,6 +266,32 @@ public class GKBluetoothMultiplexer {
 
         private static byte getLSB(int size) {
             return (byte) (size & 0xff);
+        }
+    }
+
+    private class ChannelBuffer implements Runnable {
+        public void run() {
+            while (true) {
+                try {
+                    bufferNextPacket();
+                } catch (IOException e) {
+                    Log.e(TAG, "Exception occurred while buffering a DataPacket", e);
+                    cleanup();
+                    return;
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "ChannelBuffer interrupted", e);
+                    return;
+                }
+            }
+        }
+
+        private void bufferNextPacket() throws IOException, InterruptedException {
+            DataPacket packet = DataPacketBuilder.build(mInputStream);
+            BlockingQueue<Byte> buffer = mChannelBuffers[packet.getChannel()];
+            byte[] bytes = packet.getPayload();
+            for (int i = 0; i < bytes.length; i++) {
+                buffer.put(bytes[i]);
+            }
         }
     }
 }
