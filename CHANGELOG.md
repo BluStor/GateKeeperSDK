@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.10.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.10.1)
+* Fix data upload
+    * Previously, when calling GKBluetoothCard.put data would be sent in chunks of 512 bytes. The method
+    used to buffer this data did not reset the buffer or send the correct size of the data, causing
+    any data that was longer than 512 bytes (and not a multiple of 512) to get garbage data in the last
+    `N - (N % 512)` bytes.
+* Rename `GKBluetoothMultiplexer` to `GKMultiplexer` and make it generic enough to handle IO streams only
+* Add `GKMultiplexer.writeToDataChannel(InputStream inputStream)` to handle chunked data transfer
+
 ## [v0.10.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.10.0)
 
 * Rename `GKAuthentication.enrollWithPin` to `GKAuthentication.enrollWithRecoveryCode`

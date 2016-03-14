@@ -34,8 +34,6 @@ public class GKBluetoothCard implements GKCard {
     private static final String RMD = "RMD";
     private static final String SRFT = "SRFT";
 
-    private static final int UPLOAD_DELAY_MILLIS = 1;
-
     private final String mCardName;
     private GKMultiplexer mMultiplexer;
     private List<Monitor> mCardMonitors = new ArrayList<>();
