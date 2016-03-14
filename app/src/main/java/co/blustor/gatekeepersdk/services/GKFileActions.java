@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,39 +13,13 @@ import java.util.regex.Pattern;
 import co.blustor.gatekeepersdk.data.GKFile;
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.devices.GKCard.Response;
+import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
  * GKFileActions is a Service for handling file data with the GateKeeper Card.
  */
 public class GKFileActions {
     public static final String TAG = GKFileActions.class.getSimpleName();
-
-    /**
-     * Status is the named result of an action.
-     */
-    public enum Status {
-        /**
-         * The action was successful.
-         */
-        SUCCESS,
-
-        /**
-         * The client is not currently Authenticated with the GateKeeper Card.
-         */
-        UNAUTHORIZED,
-
-        /**
-         * The target path of the action could not be found.
-         */
-        NOT_FOUND,
-
-        /**
-         * The GateKeeper Card API returned a result that GKCardSettings does
-         * not understand.
-         */
-        UNKNOWN_STATUS
-    }
-
     private final GKCard mCard;
 
     /**
@@ -100,14 +75,14 @@ public class GKFileActions {
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.5.0
      */
-    public FileResult putFile(InputStream localFile, String cardPath) throws IOException {
+    public PutFileResult putFile(InputStream localFile, String cardPath) throws IOException {
         mCard.connect();
         Response response = mCard.put(cardPath, localFile);
         if (response.getStatus() != 226) {
-            return new FileResult(response);
+            return new PutFileResult(response);
         }
         Response finalize = mCard.finalize(cardPath);
-        return new FileResult(finalize);
+        return new PutFileResult(finalize);
     }
 
     /**
@@ -143,12 +118,104 @@ public class GKFileActions {
         return new FileResult(response);
     }
 
-    private final Pattern mFilePattern = Pattern.compile("([-d])\\S+(\\S+\\s+){8}(.*)$");
+    /**
+     * Status is the named result of an action.
+     */
+    public enum Status {
+        /**
+         * The action was successful.
+         */
+        SUCCESS,
+
+        /**
+         * The client is not currently Authenticated with the GateKeeper Card.
+         */
+        UNAUTHORIZED,
+
+        /**
+         * The target path of the action could not be found.
+         */
+        NOT_FOUND,
+
+        /**
+         * The GateKeeper Card API returned a result that GKCardSettings does
+         * not understand.
+         */
+        UNKNOWN_STATUS
+    }
+
+    /**
+     * FileResult encapsulates the result of basic file actions.
+     */
+    public static class FileResult {
+        /**
+         * The {@code Response} received from the GateKeeper Card.
+         */
+        protected final Response mResponse;
+
+        /**
+         * The {@code Status} of the action.
+         */
+        protected final Status mStatus;
+
+        /**
+         * Create an {@code FileResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @since 0.5.0
+         */
+        public FileResult(Response response) {
+            mResponse = response;
+            mStatus = parseResponseStatus(response);
+        }
+
+        /**
+         * Create an {@code FileResult} with a {@code Status}
+         * received from the GateKeeper Card.
+         *
+         * @param status the {@code Response} received from the GateKeeper Card
+         * @since 0.5.0
+         */
+        public FileResult(Status status) {
+            mResponse = null;
+            mStatus = status;
+        }
+
+        /**
+         * Retrieve the {@code Status} describing the {@code FileResult}.
+         *
+         * @return the {@code Status} of the {@code FileResult}
+         * @since 0.5.0
+         */
+        public Status getStatus() {
+            return mStatus;
+        }
+
+        private Status parseResponseStatus(Response response) {
+            switch (response.getStatus()) {
+                case 213:
+                    return Status.SUCCESS;
+                case 226:
+                    return Status.SUCCESS;
+                case 250:
+                    return Status.SUCCESS;
+                case 257:
+                    return Status.SUCCESS;
+                case 530:
+                    return Status.UNAUTHORIZED;
+                case 550:
+                    return Status.NOT_FOUND;
+                default:
+                    return Status.UNKNOWN_STATUS;
+            }
+        }
+    }
 
     /**
      * ListFilesResult encapsulates the result of the "List Files" action.
      */
-    public class ListFilesResult extends FileResult {
+    public static class ListFilesResult extends FileResult {
         /**
          * The list of files retrieved from the GateKeeper Card.
          */
@@ -191,7 +258,7 @@ public class GKFileActions {
             List<GKFile> filesList = new ArrayList<>();
 
             for (String fileString : list) {
-                Matcher fileMatcher = mFilePattern.matcher(fileString);
+                Matcher fileMatcher = GKFileUtils.FILE_PATTERN.matcher(fileString);
                 if (fileMatcher.find()) {
                     String typeString = fileMatcher.group(1);
                     String name = fileMatcher.group(3);
@@ -209,7 +276,7 @@ public class GKFileActions {
     /**
      * GetFileResult encapsulates the result of the "Get File" action.
      */
-    public class GetFileResult extends FileResult {
+    public static class GetFileResult extends FileResult {
         /**
          * The file with data retrieved from the GateKeeper Card.
          */
@@ -238,58 +305,49 @@ public class GKFileActions {
     }
 
     /**
-     * FileResult encapsulates the result of basic file actions.
+     * PutFileResult encapsulates the result of the "Put File" action.
      */
-    public class FileResult {
+    public static class PutFileResult extends FileResult {
         /**
-         * The {@code Response} received from the GateKeeper Card.
+         * The GKFile with file name returned from the put command
          */
-        protected final Response mResponse;
+        protected final GKFile mFile;
 
         /**
-         * The {@code Status} of the action.
-         */
-        protected final Status mStatus;
-
-        /**
-         * Create an {@code FileResult} to interpret the {@code Response}
+         * Create a {@code PutFileResult} to interpret the {@code Response}
          * received from the GateKeeper Card.
          *
          * @param response the {@code Response} received from the GateKeeper Card
-         * @since 0.5.0
          */
-        public FileResult(Response response) {
-            mResponse = response;
-            mStatus = parseResponseStatus(response);
+        public PutFileResult(Response response) {
+            super(response);
+            mFile = parseFileName();
         }
 
         /**
-         * Retrieve the {@code Status} describing the {@code FileResult}.
-         *
-         * @return the {@code Status} of the {@code FileResult}
-         * @since 0.5.0
+         * @return the {@code GKFile} that represents the created file
          */
-        public Status getStatus() {
-            return mStatus;
+        public GKFile getFile() {
+            return mFile;
         }
-    }
 
-    private Status parseResponseStatus(Response response) {
-        switch (response.getStatus()) {
-            case 213:
-                return Status.SUCCESS;
-            case 226:
-                return Status.SUCCESS;
-            case 250:
-                return Status.SUCCESS;
-            case 257:
-                return Status.SUCCESS;
-            case 530:
-                return Status.UNAUTHORIZED;
-            case 550:
-                return Status.NOT_FOUND;
-            default:
-                return Status.UNKNOWN_STATUS;
+        private GKFile parseFileName() {
+            String data = mResponse.getMessage();
+            if (data == null) {
+                return null;
+            }
+
+            int pathStartIndex = data.indexOf(":") + 1;
+            String filePath = data.substring(pathStartIndex);
+            int lastFileSeparatorIndex = filePath.lastIndexOf("/");
+            if (lastFileSeparatorIndex == -1) {
+                return new GKFile(filePath, GKFile.Type.FILE);
+            }
+
+            String fileName = filePath.substring(lastFileSeparatorIndex + 1);
+            GKFile gkFile = new GKFile(fileName, GKFile.Type.FILE);
+            gkFile.setCardPath(filePath);
+            return gkFile;
         }
     }
 }
