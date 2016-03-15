@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.12.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.12.0)
+* Change `GKAuthentication` enroll/revoke face/recoveryCode id from int to String
+
 ## [v0.11.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.11.0)
 * Change `GKEnvironment` and `GKLicensing` to handle license files being stored on the card
 * `GKEnvironment.InitializationListener` now has 3 new callbacks
