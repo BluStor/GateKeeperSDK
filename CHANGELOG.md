@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.11.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.11.0)
+* Change `GKEnvironment` and `GKLicensing` to handle license files being stored on the card
+* `GKEnvironment.InitializationListener` now has 3 new callbacks
+    * `void onNoLicensesAvailable();` is called when all of the license files are used
+    * `void onLicenseValidationFailure();` is called when the license validation fails, based on return values from biometric libraries
+    * `void onLicenseValidationError();` is called when there is an exception thrown anywhere along the way, or if the calls to the card return non-SUCCESS statuses
+
 ## [v0.10.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.10.1)
 * Fix data upload
     * Previously, when calling GKBluetoothCard.put data would be sent in chunks of 512 bytes. The method
