@@ -2,7 +2,13 @@ package co.blustor.gatekeepersdk.utils;
 
 import android.support.annotation.NonNull;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * GKFileUtils is a functional, static class intended for common operations
@@ -11,9 +17,19 @@ import java.util.ArrayList;
 public class GKFileUtils {
 
     /**
-     *  Base path of the card
+     * Base path of the card
      */
     public static final String ROOT = "/data";
+
+    /**
+     * Base path for license storage
+     */
+    public static final String LICENSE_ROOT = "/license";
+
+    /**
+     * Regex pattern for the return values of files
+     */
+    public static final Pattern FILE_PATTERN = Pattern.compile("([-d])\\S+(\\S+\\s+){8}(.*)$");
 
     /**
      * Join an array of {@link String} objects using the '/' path separator.
@@ -23,7 +39,7 @@ public class GKFileUtils {
      */
     public static String joinPath(String... paths) {
         ArrayList<String> list = nonblankPathSegments(paths);
-        return GKStringUtils.join(list.toArray(new String[list.size()]), "/").replace("//", "/");
+        return GKStringUtils.join(list.toArray(new String[list.size()]), "/").replaceAll("/\\/+/", "/");
     }
 
     /**
@@ -34,6 +50,53 @@ public class GKFileUtils {
      */
     public static ArrayList<String> parsePath(String path) {
         return nonblankPathSegments(path.split("/"));
+    }
+
+    /**
+     * Read a file and return as a String
+     *
+     * @param path      the filepath to append the extension to
+     * @param extension the extension to be appended
+     * @return the string representing the filename with extension
+     * @since 0.11.0
+     */
+    public static String addExtension(String path, String extension) {
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+
+        if (extension == null || extension.isEmpty()) {
+            return path;
+        }
+
+        return path + "." + extension;
+    }
+
+    /**
+     * Read a file and return as a String
+     *
+     * @param file the file to read
+     * @return the string representing the contents of the file
+     * @throws IOException when reading the file fails
+     * @since 0.11.0
+     */
+    public static String readFile(File file) throws IOException {
+        Reader reader = new FileReader(file);
+        BufferedReader br = new BufferedReader(reader);
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (; ; ) {
+                String line = br.readLine();
+                if (line == null) {
+                    return sb.toString();
+                } else {
+                    sb.append(line);
+                }
+                sb.append(System.getProperty("line.separator"));
+            }
+        } finally {
+            br.close();
+        }
     }
 
     @NonNull

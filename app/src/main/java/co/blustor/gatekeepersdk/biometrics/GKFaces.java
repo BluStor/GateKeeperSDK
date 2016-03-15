@@ -51,6 +51,7 @@ public class GKFaces {
      *
      * @param file an image {@code File} of a face to extract
      * @return a {@code Template} with facial capture data
+     * @throws IOException when a template fails to be created
      * @since 0.6.0
      */
     public Template createTemplateFromImage(File file) throws IOException {

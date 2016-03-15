@@ -1,5 +1,8 @@
 package co.blustor.gatekeepersdk.data;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
@@ -108,6 +111,24 @@ public class GKFile {
         String[] parts = mName.split("\\.");
         String ext = (parts.length > 1) ? parts[parts.length - 1] : null;
         return ext;
+    }
+
+    /**
+     * Retrieve the filename without the extension (when present) of the file.
+     *
+     * @return the {@code String} name of the file without extension.
+     * {@code NULL} if the file is a directory or does not have an extension.
+     * @since 0.11.0
+     */
+    public String getFilenameBase() {
+        if (mType == Type.DIRECTORY) {
+            return null;
+        }
+        int extensionIndex = mName.lastIndexOf(".");
+        if (extensionIndex == -1) {
+            extensionIndex = mName.length();
+        }
+        return mName.substring(0, extensionIndex);
     }
 
     /**

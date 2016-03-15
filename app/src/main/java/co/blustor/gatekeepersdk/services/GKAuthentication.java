@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import co.blustor.gatekeepersdk.biometrics.GKFaces;
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.devices.GKCard.Response;
+import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
  * GKAuthentication is a Service for using facial authentication with the GateKeeper Card.
@@ -380,8 +381,6 @@ public class GKAuthentication {
          */
         protected final List<Object> mTemplates;
 
-        private Pattern mFilePattern = Pattern.compile("([-d])\\S+(\\S+\\s+){8}(.*)$");
-
         /**
          * Create a {@code ListTemplatesResult} to interpret the {@code Response}
          * received from the GateKeeper Card.
@@ -448,7 +447,7 @@ public class GKAuthentication {
             List<String> templateList = new ArrayList<>();
 
             for (String fileString : lineList) {
-                Matcher fileMatcher = mFilePattern.matcher(fileString);
+                Matcher fileMatcher = GKFileUtils.FILE_PATTERN.matcher(fileString);
                 if (fileMatcher.find()) {
                     String typeString = fileMatcher.group(1);
                     String name = fileMatcher.group(3);
