@@ -47,22 +47,22 @@ public class GKAuthentication {
      * @param template the {@code Template} to be stored
      * @return the {@code AuthResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
-     * @since 0.5.0
+     * @since 0.12.0
      */
     public AuthResult enrollWithFace(GKFaces.Template template) throws IOException {
-        return enrollWithFace(template, 0);
+        return enrollWithFace(template, "0");
     }
 
     /**
      * Store a {@code Template} at the given template index on the GateKeeper Card.
      *
      * @param template   the {@code Template} to be stored
-     * @param templateId the index at which to store the {@code template}
+     * @param templateId the name of the file at which to store the {@code template}
      * @return the {@code AuthResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
-     * @since 0.5.0
+     * @since 0.12.0
      */
-    public AuthResult enrollWithFace(GKFaces.Template template, int templateId) throws IOException {
+    public AuthResult enrollWithFace(GKFaces.Template template, String templateId) throws IOException {
         if (template.getQuality() != GKFaces.Template.Quality.OK) {
             return new AuthResult(GKAuthentication.Status.BAD_TEMPLATE);
         }
@@ -78,19 +78,19 @@ public class GKAuthentication {
      * @since 0.10.0
      */
     public AuthResult enrollWithRecoveryCode(String recoveryCode) throws IOException {
-        return enrollWithRecoveryCode(recoveryCode, 0);
+        return enrollWithRecoveryCode(recoveryCode, "0");
     }
 
     /**
      * Store a recovery code at the given template index on the GateKeeper Card.
      *
      * @param recoveryCode the String to be stored
-     * @param templateId the index at which to store the recovery code
+     * @param templateId the id at which to store the recovery code
      * @return the {@code AuthResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.10.0
      */
-    public AuthResult enrollWithRecoveryCode(String recoveryCode, int templateId) throws IOException {
+    public AuthResult enrollWithRecoveryCode(String recoveryCode, String templateId) throws IOException {
         ByteArrayInputStream inputStream = getInputStreamWithBytes(recoveryCode);
         return submitInputStream(inputStream, ENROLL_RECOVERY_CODE_PATH_PREFIX + templateId);
     }
@@ -144,18 +144,18 @@ public class GKAuthentication {
      * @since 0.5.0
      */
     public AuthResult revokeFace() throws IOException {
-        return revokeFace(0);
+        return revokeFace("0");
     }
 
     /**
      * Delete the {@code Template} at the given template index on the GateKeeper Card.
      *
-     * @param templateId the index at which to delete a {@code template}
+     * @param templateId the id at which to delete a {@code template}
      * @return the {@code AuthResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.5.0
      */
-    public AuthResult revokeFace(int templateId) throws IOException {
+    public AuthResult revokeFace(String templateId) throws IOException {
         mCard.connect();
         Response response = mCard.delete(REVOKE_FACE_PATH_PREFIX + templateId);
         return new AuthResult(response);
@@ -169,7 +169,7 @@ public class GKAuthentication {
      * @since 0.6.1
      */
     public AuthResult revokeRecoveryCode() throws IOException {
-        return revokeRecoveryCode(0);
+        return revokeRecoveryCode("0");
     }
 
     /**
@@ -180,7 +180,7 @@ public class GKAuthentication {
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.6.1
      */
-    public AuthResult revokeRecoveryCode(int templateId) throws IOException {
+    public AuthResult revokeRecoveryCode(String templateId) throws IOException {
         mCard.connect();
         return new AuthResult(mCard.delete(REVOKE_RECOVERY_CODE_PATH_PREFIX + templateId));
     }
