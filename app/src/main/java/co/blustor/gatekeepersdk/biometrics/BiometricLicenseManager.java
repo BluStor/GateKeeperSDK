@@ -4,6 +4,9 @@ import com.neurotec.licensing.NLicense;
 
 import java.io.IOException;
 
+/**
+ * Intended for internal use only.
+ */
 public class BiometricLicenseManager {
     private String mHost;
     private int mPort;

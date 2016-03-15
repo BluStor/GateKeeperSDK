@@ -9,6 +9,9 @@ import co.blustor.gatekeepersdk.data.GKFile;
 import co.blustor.gatekeepersdk.services.GKFileActions;
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
+/**
+ * Intended for internal use only.
+ */
 public class GenerateActiveLicense {
     private final BiometricLicenseManager mLicenseManager;
     protected GKFileActions mFileActions;
