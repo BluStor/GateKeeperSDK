@@ -1,16 +1,27 @@
 package co.blustor.gatekeepersdk.biometrics;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.view.View;
+import android.view.ViewGroup;
 
+import com.neurotec.biometrics.NBiometricCaptureOption;
+import com.neurotec.biometrics.NBiometricOperation;
 import com.neurotec.biometrics.NBiometricStatus;
+import com.neurotec.biometrics.NBiometricTask;
 import com.neurotec.biometrics.NFace;
 import com.neurotec.biometrics.NLRecord;
 import com.neurotec.biometrics.NSubject;
 import com.neurotec.biometrics.NTemplate;
 import com.neurotec.biometrics.NTemplateSize;
 import com.neurotec.biometrics.client.NBiometricClient;
+import com.neurotec.biometrics.view.NFaceView;
+import com.neurotec.devices.NCamera;
+import com.neurotec.devices.NDevice;
+import com.neurotec.devices.NDeviceType;
 import com.neurotec.images.NImage;
+import com.neurotec.util.concurrent.CompletionHandler;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,11 +29,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.EnumSet;
 
 /**
  * GKFaces is a Service for handling facial biometrics.
  */
 public class GKFaces {
+    private static final String FRONT_CAMERA_DEVICE_NAME = "Front";
     private final NBiometricClient mBiometricClient;
 
     /**
@@ -30,8 +43,9 @@ public class GKFaces {
      */
     public GKFaces() {
         mBiometricClient = new NBiometricClient();
-        mBiometricClient.initialize();
         mBiometricClient.setFacesTemplateSize(NTemplateSize.SMALL);
+        mBiometricClient.setUseDeviceManager(true);
+        mBiometricClient.initialize();
     }
 
     /**
@@ -78,6 +92,102 @@ public class GKFaces {
         }
     }
 
+    /**
+     * Set up view for face capturing
+     *
+     * @param context   application/activity context.
+     * @param container ViewGroup where the camera is going to be displayed
+     * @return the attached {@code NFaceView}
+     * @since 0.13.0
+     */
+    public NFaceView setFaceCaptureView(Context context, ViewGroup container) {
+        NFaceView nFaceView = new NFaceView(context);
+        nFaceView.setVisibility(View.VISIBLE);
+        container.addView(nFaceView);
+        return nFaceView;
+    }
+
+    /**
+     * Start the camera for face capturing
+     *
+     * @param faceView the {@code View} where the camera will be displayed
+     * @param listener {@code OnCameraCompletionListener} for success/failure responses
+     * @since 0.13.0
+     */
+    public void startCapturing(NFaceView faceView, final OnCameraCompletionListener listener) {
+        NSubject nSubject = new NSubject();
+        NFace nFace = new NFace();
+        setFrontFaceCamera();
+        EnumSet<NBiometricCaptureOption> options = EnumSet.of(NBiometricCaptureOption.MANUAL, NBiometricCaptureOption.STREAM);
+        nFace.setCaptureOptions(options);
+        faceView.setFace(nFace);
+        nSubject.getFaces().add(nFace);
+        startCameraCapture(nSubject, new CompletionHandler<NBiometricTask, NBiometricOperation>() {
+            @Override
+            public void completed(NBiometricTask nBiometricTask, NBiometricOperation nBiometricOperation) {
+                NImage image = getNImage(nBiometricTask);
+                if (image != null) {
+                    GKFaces.Template template = createTemplateFromNImage(image);
+                    listener.onSuccess(template, image.toBitmap());
+                }
+            }
+
+            @Override
+            public void failed(Throwable throwable, NBiometricOperation nBiometricOperation) {
+                // this is called too often and too generically for us to have a use for it
+            }
+        });
+    }
+
+    /**
+     * Captures results from the current camera thread when thread is active
+     * No-op when there is no camera capture thread
+     *
+     * @since 0.13.0
+     */
+    public void captureImage() {
+        mBiometricClient.force();
+    }
+
+    /**
+     * Cancels the current camera capture thread
+     * No-op when there is no camera capture thread
+     *
+     * @since 0.13.0
+     */
+    public void finishCameraCapture() {
+        mBiometricClient.cancel();
+    }
+
+    private NImage getNImage(NBiometricTask nBiometricTask) {
+        NBiometricTask.SubjectCollection subjects = nBiometricTask.getSubjects();
+        if (subjects.isEmpty()) {
+            return null;
+        }
+        NSubject.FaceCollection faces = subjects.get(0).getFaces();
+        if (faces.isEmpty()) {
+            return null;
+        }
+
+        return faces.get(0).getImage();
+    }
+
+    private void setFrontFaceCamera() {
+        for (NDevice device : mBiometricClient.getDeviceManager().getDevices()) {
+            if (device.getDeviceType().contains(NDeviceType.CAMERA)) {
+                if (device.getDisplayName().contains(FRONT_CAMERA_DEVICE_NAME)) {
+                    if (!mBiometricClient.getFaceCaptureDevice().equals(device))
+                        mBiometricClient.setFaceCaptureDevice((NCamera) device);
+                }
+            }
+        }
+    }
+
+    private void startCameraCapture(NSubject nSubject, CompletionHandler completionHandler) {
+        NBiometricTask task = mBiometricClient.createTask(EnumSet.of(NBiometricOperation.CREATE_TEMPLATE), nSubject);
+        mBiometricClient.performTask(task, NBiometricOperation.CREATE_TEMPLATE, completionHandler);
+    }
+
     private Template createTemplateFromNImage(NImage nImage) {
         NSubject subject = new NSubject();
         NFace nFace = mBiometricClient.detectFaces(nImage);
@@ -101,34 +211,20 @@ public class GKFaces {
     }
 
     /**
+     * Interface of camera completion results
+     * <p>
+     * when successful onSuccess will provide a {@code Template}
+     *
+     * @since 0.13.0
+     */
+    public interface OnCameraCompletionListener {
+        void onSuccess(Template template, Bitmap image);
+    }
+
+    /**
      * A Template contains captured facial biometric data.
      */
     public static class Template {
-        /**
-         * Indicators of usability for captured images.
-         */
-        public enum Quality {
-            /**
-             * The Template was successfully created.
-             */
-            OK,
-
-            /**
-             * The image was not sharp enough to extract a Template.
-             */
-            BLURRY,
-
-            /**
-             * A face was not found within the captured image.
-             */
-            NO_FACE,
-
-            /**
-             * The source data could not be used to create a Template.
-             */
-            BAD_DATA
-        }
-
         private final NSubject mSubject;
         private final Quality mQuality;
 
@@ -184,6 +280,31 @@ public class GKFaces {
                 default:
                     return Quality.NO_FACE;
             }
+        }
+
+        /**
+         * Indicators of usability for captured images.
+         */
+        public enum Quality {
+            /**
+             * The Template was successfully created.
+             */
+            OK,
+
+            /**
+             * The image was not sharp enough to extract a Template.
+             */
+            BLURRY,
+
+            /**
+             * A face was not found within the captured image.
+             */
+            NO_FACE,
+
+            /**
+             * The source data could not be used to create a Template.
+             */
+            BAD_DATA
         }
     }
 }
