@@ -106,7 +106,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public void connect() throws IOException {
-        if (mMultiplexer == null) {
+        if (isDisconnected()) {
             onConnectionChanged(ConnectionState.CONNECTING);
             BluetoothDevice bluetoothDevice = findBluetoothDevice();
             if (bluetoothDevice == null) {
@@ -183,6 +183,10 @@ public class GKBluetoothCard implements GKCard {
                 mCardMonitors.remove(monitor);
             }
         }
+    }
+
+    private boolean isDisconnected() {
+        return mMultiplexer == null || mBluetoothSocket == null || !mBluetoothSocket.isConnected();
     }
 
     private Response get(String method, String cardPath) throws IOException {
