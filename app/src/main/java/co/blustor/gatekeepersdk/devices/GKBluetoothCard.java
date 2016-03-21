@@ -107,6 +107,7 @@ public class GKBluetoothCard implements GKCard {
     @Override
     public void connect() throws IOException {
         if (isDisconnected()) {
+            disconnect();
             onConnectionChanged(ConnectionState.CONNECTING);
             BluetoothDevice bluetoothDevice = findBluetoothDevice();
             if (bluetoothDevice == null) {

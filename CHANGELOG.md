@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.12.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.12.1)
+* Create new bluetooth socket connection if the current socket is no longer connected
+
 ## [v0.12.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.12.0)
 * Change `GKAuthentication` enroll/revoke face/recoveryCode id from int to String
 
