@@ -36,11 +36,6 @@ public class GenerateActiveLicense {
             throw new IOException("Could not create license subdirectory: " + mLicenseSubDir);
         }
 
-        GKFileActions.PutFileResult putSerialNumberFileResult = storeSerialNumberFile(serialNumberFile, serialNumber);
-        if (putSerialNumberFileResult.getStatus() != GKFileActions.Status.SUCCESS) {
-            throw new IOException("Could not create serial number file");
-        }
-
         String generatedId = mLicenseManager.generateID(serialNumber);
         GKFileActions.PutFileResult putIdFileResult = storeIdFile(serialNumberFile, generatedId);
         if (putIdFileResult.getStatus() != GKFileActions.Status.SUCCESS) {
@@ -54,11 +49,6 @@ public class GenerateActiveLicense {
             putLicenseFileResult = storeLicenseFile(serialNumberFile, license);
             if (putLicenseFileResult.getStatus() != GKFileActions.Status.SUCCESS) {
                 throw new IOException("Could not create license file");
-            }
-
-            GKFileActions.FileResult deleteSerialFileResult = mFileActions.deleteFile(serialNumberFile);
-            if (deleteSerialFileResult.getStatus() != GKFileActions.Status.SUCCESS) {
-                throw new IOException("Could not delete license file from root");
             }
 
             return license;

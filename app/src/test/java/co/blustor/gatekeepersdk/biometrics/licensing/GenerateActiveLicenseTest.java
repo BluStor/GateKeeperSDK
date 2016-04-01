@@ -46,7 +46,6 @@ public class GenerateActiveLicenseTest {
     private BiometricLicenseManager licenseManager;
     private File tempSerialNumberFile;
     private GKFile serialFile;
-    private GKFile licenseFile;
     private GKFileActions.GetFileResult successfulGetFileResultForSerial;
 
     @Before
@@ -61,7 +60,6 @@ public class GenerateActiveLicenseTest {
         serialWriter.close();
 
         serialFile = new GKFile("test.sn", GKFile.Type.FILE);
-        licenseFile = new GKFile("test.lic", GKFile.Type.FILE);
 
         successfulGetFileResultForSerial = mock(GKFileActions.GetFileResult.class);
         when(successfulGetFileResultForSerial.getStatus()).thenReturn(GKFileActions.Status.SUCCESS);
@@ -152,18 +150,6 @@ public class GenerateActiveLicenseTest {
     }
 
     @Test(expected = IOException.class)
-    public void doesNotCreateTheIdIfWritingTheSerialFileFails() throws Exception {
-        when(fileActions.getFile(eq(serialFile), any(File.class))).thenReturn(successfulGetFileResultForSerial);
-
-        String serialCardPath = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, licenseSubdir, "test.sn");
-        GKFileActions.PutFileResult failResult = mock(GKFileActions.PutFileResult.class);
-        when(failResult.getStatus()).thenReturn(GKFileActions.Status.UNKNOWN_STATUS);
-        when(fileActions.putFile(inputStreamMatching(serialContents), contains(serialCardPath))).thenReturn(failResult);
-
-        subject.execute(serialFile);
-    }
-
-    @Test(expected = IOException.class)
     public void doesNotCreateTheLicenseIfWritingTheIdFileFails() throws Exception {
         when(fileActions.getFile(eq(serialFile), any(File.class))).thenReturn(successfulGetFileResultForSerial);
 
@@ -204,72 +190,6 @@ public class GenerateActiveLicenseTest {
             verify(licenseManager).deactivateOnline(licenseContents);
             verify(fileActions, never()).deleteFile(any(GKFile.class));
         }
-    }
-
-    @Test
-    public void deactivatesTheLicenseAndDeletesItsFileIfDeletingTheSerialFileFails() throws Exception {
-        when(fileActions.getFile(eq(serialFile), any(File.class))).thenReturn(successfulGetFileResultForSerial);
-
-        String licenseCardPath = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, licenseSubdir, "test.lic");
-        GKFileActions.PutFileResult putLicenseResult = mock(GKFileActions.PutFileResult.class);
-        when(putLicenseResult.getStatus()).thenReturn(GKFileActions.Status.SUCCESS);
-        when(putLicenseResult.getFile()).thenReturn(licenseFile);
-        when(fileActions.putFile(inputStreamMatching(licenseContents), contains(licenseCardPath))).thenReturn(putLicenseResult);
-
-        GKFileActions.FileResult failResult = mock(GKFileActions.FileResult.class);
-        when(failResult.getStatus()).thenReturn(GKFileActions.Status.UNKNOWN_STATUS);
-        when(fileActions.deleteFile(serialFile)).thenReturn(failResult);
-
-        try {
-            subject.execute(serialFile);
-            fail("Exception expected but not thrown");
-        } catch (IOException e) {
-            verify(licenseManager).deactivateOnline(licenseContents);
-            verify(fileActions).deleteFile(licenseFile);
-        }
-    }
-
-    @Test
-    public void deactivatesTheLicenseAndDeletesItsFileIfDeletingTheSerialFileThrowsAnException() throws Exception {
-        when(fileActions.getFile(eq(serialFile), any(File.class))).thenReturn(successfulGetFileResultForSerial);
-        when(fileActions.deleteFile(serialFile)).thenThrow(IOException.class);
-
-        String licenseCardPath = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, licenseSubdir, "test.lic");
-        GKFileActions.PutFileResult putLicenseResult = mock(GKFileActions.PutFileResult.class);
-        when(putLicenseResult.getStatus()).thenReturn(GKFileActions.Status.SUCCESS);
-        when(putLicenseResult.getFile()).thenReturn(licenseFile);
-        when(fileActions.putFile(inputStreamMatching(licenseContents), contains(licenseCardPath))).thenReturn(putLicenseResult);
-
-        try {
-            subject.execute(serialFile);
-            fail("Exception expected but not thrown");
-        } catch (IOException e) {
-            verify(licenseManager).deactivateOnline(licenseContents);
-            verify(fileActions).deleteFile(licenseFile);
-        }
-    }
-
-    @Test
-    public void writesTheSerialNumberIdAndLicenseToNewFilesInTheLicenseSubdir() throws Exception {
-        when(fileActions.getFile(eq(serialFile), any(File.class))).thenReturn(successfulGetFileResultForSerial);
-
-        subject.execute(serialFile);
-
-        String serialCardPath = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, licenseSubdir, "test.sn");
-        verify(fileActions).putFile(inputStreamMatching(serialContents), eq(serialCardPath));
-        String idCardPath = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, licenseSubdir, "test.id");
-        verify(fileActions).putFile(inputStreamMatching(idContents), eq(idCardPath));
-        String licCardPath = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, licenseSubdir, "test.lic");
-        verify(fileActions).putFile(inputStreamMatching(licenseContents), eq(licCardPath));
-    }
-
-    @Test
-    public void deletesSerialNumberFileFromTheRootLicenseDirectory() throws Exception {
-        when(fileActions.getFile(eq(serialFile), any(File.class))).thenReturn(successfulGetFileResultForSerial);
-
-        subject.execute(serialFile);
-
-        verify(fileActions).deleteFile(serialFile);
     }
 
     private InputStream inputStreamMatching(String expected) {
