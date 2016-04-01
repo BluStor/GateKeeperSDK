@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.12.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.12.2)
+* Remove unnecessary steps in license validation for enterprise license
+
 ## [v0.12.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.12.1)
 * Create new bluetooth socket connection if the current socket is no longer connected
 
