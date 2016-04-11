@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.13.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.13.0)
+* Updates all relevant Neurotech libraries to version 6.0 revision 146188 (March 18, 2016)
+* Adds the following functions in GKFaces to extract templates using the camera
+    * `setFaceCaptureView`
+    * `startCapturing`
+    * `captureImage`
+    * `finishCameraCapture`
+
 ## [v0.12.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.12.2)
 * Remove unnecessary steps in license validation for enterprise license
 
