@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.14.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.0)
+* Prepare SDK for production releases
+    * bump android support-annotations version
+    * add proguard rules for minification
+    * minify built .aar files
+
+
 ## [v0.13.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.13.0)
 * Updates all relevant Neurotech libraries to version 6.0 revision 146188 (March 18, 2016)
 * Adds the following functions in GKFaces to extract templates using the camera
