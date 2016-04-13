@@ -15,21 +15,3 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
--keep class java.awt.** { *; }
--keep class com.sun.jna.** { *; }
--keep class com.neurotec.** { *; }
--keep public class co.blustor.gatekeepersdk.** {
-    public <methods>;
-    public <fields>;
-}
--keep interface com.sun.jna.** { *; }
--keep interface com.neurotec.** { *; }
--keep public interface co.blustor.gatekeepersdk.** {
-    public <methods>;
-    public <fields>;
-}
--keepclasseswithmembernames class * {
-    native <methods>;
-}
--keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
--dontwarn java.awt.**

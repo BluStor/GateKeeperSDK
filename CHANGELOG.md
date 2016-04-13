@@ -3,9 +3,14 @@
 ## [v0.14.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.0)
 * Prepare SDK for production releases
     * bump android support-annotations version
-    * add proguard rules for minification
-    * minify built .aar files
-
+    * bump gradle version to 2.10.0 (android gradle version 2.0)
+    * add library manifests to excluded files in packagingOptions, so consumers of this SDK no longer need to put the following in their build.gradle
+        * ```
+            packagingOptions {
+                exclude 'META-INF/LE-832C0.RSA'
+                exclude 'META-INF/LE-832C0.SF'
+            }
+        ```
 
 ## [v0.13.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.13.0)
 * Updates all relevant Neurotech libraries to version 6.0 revision 146188 (March 18, 2016)
