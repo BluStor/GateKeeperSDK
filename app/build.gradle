@@ -18,7 +18,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -30,6 +30,11 @@ android {
 
     lintOptions {
         disable "InvalidPackage"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LE-832C0.RSA'
+        exclude 'META-INF/LE-832C0.SF'
     }
 
     libraryVariants.all { variant ->
