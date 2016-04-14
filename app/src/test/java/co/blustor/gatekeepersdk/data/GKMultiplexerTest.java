@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import co.blustor.gatekeepersdk.devices.CommPort;
+import co.blustor.gatekeepersdk.devices.IOCommPort;
+
+import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
@@ -23,7 +27,8 @@ public class GKMultiplexerTest {
     public void setUp() {
         InputStream inputStream = new ByteArrayInputStream(new byte[0]);
         outputStream = new ByteArrayOutputStream();
-        multiplexer = new GKMultiplexer(inputStream, outputStream);
+        IOCommPort commPort = new IOCommPort(inputStream, outputStream);
+        multiplexer = new GKMultiplexer(commPort);
     }
 
     @Test

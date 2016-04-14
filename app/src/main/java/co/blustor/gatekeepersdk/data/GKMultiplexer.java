@@ -5,12 +5,13 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import co.blustor.gatekeepersdk.devices.CommPort;
 
 /**
  * Intended for internal use only.
@@ -27,11 +28,10 @@ public class GKMultiplexer {
     private static final byte TERMINATE_CHANNEL_BYTE = Byte.MAX_VALUE;
     private static final int UPLOAD_DELAY_MILLIS = 1;
 
-    private InputStream mInputStream;
-    private OutputStream mOutputStream;
+    private CommPort mCommPort;
     private BlockingQueue<Byte>[] mChannelBuffers = new LinkedBlockingQueue[MAX_CHANNEL_NUMBER + 1];
-    private Thread mBufferingThread;
 
+    private Thread mBufferingThread;
     private boolean mExiting = false;
 
     {
@@ -40,9 +40,8 @@ public class GKMultiplexer {
         }
     }
 
-    public GKMultiplexer(InputStream inputStream, OutputStream outputStream) {
-        mInputStream = inputStream;
-        mOutputStream = outputStream;
+    public GKMultiplexer(CommPort commPort) {
+        mCommPort = commPort;
     }
 
     public void writeToCommandChannel(byte[] data) throws IOException {
@@ -98,8 +97,7 @@ public class GKMultiplexer {
         try {
             mExiting = true;
             terminateChannelReaders();
-            mInputStream.close();
-            mOutputStream.close();
+            mCommPort.close();
         } catch (IOException e) {
             Log.e(TAG, "Exception occurred during cleanup", e);
         } catch (InterruptedException e) {
@@ -115,7 +113,7 @@ public class GKMultiplexer {
 
     private void write(byte[] data, int channel) throws IOException {
         byte[] packetBytes = DataPacketBuilder.toPacketBytes(data, channel);
-        mOutputStream.write(packetBytes);
+        mCommPort.write(packetBytes);
     }
 
     private byte[] readLine(int channel) throws IOException, InterruptedException {
@@ -189,12 +187,12 @@ public class GKMultiplexer {
     private static class DataPacketBuilder {
         public static final String TAG = DataPacketBuilder.class.getSimpleName();
 
-        public static DataPacket build(InputStream inputStream) throws IOException {
-            byte[] header = readHeader(inputStream);
+        public static DataPacket build(CommPort commPort) throws IOException {
+            byte[] header = readHeader(commPort);
             int packetSize = getPacketSize(header);
             int channel = getPacketChannel(header);
-            byte[] payload = readPayload(inputStream, packetSize);
-            byte[] checksum = readChecksum(inputStream);
+            byte[] payload = readPayload(commPort, packetSize);
+            byte[] checksum = readChecksum(commPort);
 
             return new DataPacket(payload, channel);
         }
@@ -230,29 +228,22 @@ public class GKMultiplexer {
             return (int) header[0];
         }
 
-        private static byte[] readHeader(InputStream inputStream) throws IOException {
-            return fillByteArrayFromStream(inputStream, DataPacket.HEADER_SIZE);
+        private static byte[] readHeader(CommPort commPort) throws IOException {
+            byte[] data = new byte[DataPacket.HEADER_SIZE];
+            commPort.read(data);
+            return data;
         }
 
-        private static byte[] readPayload(InputStream inputStream, int packetSize) throws IOException {
-            int payloadsize = packetSize - (DataPacket.HEADER_SIZE + DataPacket.CHECKSUM_SIZE);
-            return fillByteArrayFromStream(inputStream, payloadsize);
+        private static byte[] readPayload(CommPort commPort, int packetSize) throws IOException {
+            int payloadSize = packetSize - (DataPacket.HEADER_SIZE + DataPacket.CHECKSUM_SIZE);
+            byte[] data = new byte[payloadSize];
+            commPort.read(data);
+            return data;
         }
 
-        private static byte[] readChecksum(InputStream inputStream) throws IOException {
-            return fillByteArrayFromStream(inputStream, DataPacket.CHECKSUM_SIZE);
-        }
-
-        private static byte[] fillByteArrayFromStream(InputStream inputStream, int length) throws IOException {
-            byte[] data = new byte[length];
-            int totalBytesRead = 0;
-            int bytesRead = 0;
-            while (totalBytesRead < length && bytesRead != -1) {
-                bytesRead = inputStream.read(data, totalBytesRead, length - totalBytesRead);
-                if (bytesRead != -1) {
-                    totalBytesRead += bytesRead;
-                }
-            }
+        private static byte[] readChecksum(CommPort commPort) throws IOException {
+            byte[] data = new byte[DataPacket.CHECKSUM_SIZE];
+            commPort.read(data);
             return data;
         }
 
@@ -286,7 +277,7 @@ public class GKMultiplexer {
         }
 
         private void bufferNextPacket() throws IOException, InterruptedException {
-            DataPacket packet = DataPacketBuilder.build(mInputStream);
+            DataPacket packet = DataPacketBuilder.build(mCommPort);
             BlockingQueue<Byte> buffer = mChannelBuffers[packet.getChannel()];
             byte[] bytes = packet.getPayload();
             for (int i = 0; i < bytes.length; i++) {
