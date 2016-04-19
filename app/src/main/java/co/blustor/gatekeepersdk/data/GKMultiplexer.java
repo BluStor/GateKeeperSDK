@@ -190,6 +190,10 @@ public class GKMultiplexer {
         public static DataPacket build(CommPort commPort) throws IOException {
             byte[] header = readHeader(commPort);
             int packetSize = getPacketSize(header);
+            if (packetSize == 0) {
+                Log.d("WATWAT", "no packet to buffer");
+                return null;
+            }
             int channel = getPacketChannel(header);
             byte[] payload = readPayload(commPort, packetSize);
             byte[] checksum = readChecksum(commPort);
@@ -230,7 +234,9 @@ public class GKMultiplexer {
 
         private static byte[] readHeader(CommPort commPort) throws IOException {
             byte[] data = new byte[DataPacket.HEADER_SIZE];
-            commPort.read(data);
+            int read = commPort.read(data);
+            Log.d("WATWAT", "bytes read: " + read);
+            Log.d("WATWAT", new String(data));
             return data;
         }
 
@@ -278,8 +284,12 @@ public class GKMultiplexer {
 
         private void bufferNextPacket() throws IOException, InterruptedException {
             DataPacket packet = DataPacketBuilder.build(mCommPort);
+            if (packet == null) {
+                return;
+            }
             BlockingQueue<Byte> buffer = mChannelBuffers[packet.getChannel()];
             byte[] bytes = packet.getPayload();
+            Log.d("WATWAT", new String(bytes));
             for (int i = 0; i < bytes.length; i++) {
                 buffer.put(bytes[i]);
             }

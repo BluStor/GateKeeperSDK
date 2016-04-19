@@ -1,25 +1,20 @@
 package co.blustor.gatekeepersdk.devices;
 
-import android.content.Context;
-
 import java.io.IOException;
 
 import co.blustor.gatekeepersdk.data.GKMultiplexer;
 
 public class GKUsbCard extends GKCard {
 
-    private Context mContext;
     private UsbCommPort mCommPort;
 
-    public GKUsbCard(Context context) {
+    public GKUsbCard(UsbCommPort commPort) {
         super();
-        mContext = context;
+        mCommPort = commPort;
     }
 
     @Override
     protected GKMultiplexer connectToMultiplexer() throws IOException {
-        mCommPort = new UsbCommPort(mContext);
-        mCommPort.connect();
         return new GKMultiplexer(mCommPort);
     }
 

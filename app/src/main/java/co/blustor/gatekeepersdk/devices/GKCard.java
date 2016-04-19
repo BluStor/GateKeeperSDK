@@ -140,7 +140,7 @@ public abstract class GKCard {
      */
     public void connect() throws IOException {
         if (isDisconnected()) {
-            disconnect();
+//            disconnect();
             onConnectionChanged(ConnectionState.CONNECTING);
             try {
                 mMultiplexer = connectToMultiplexer();
