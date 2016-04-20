@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.14.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.1)
+* Fix GKFileActions.listFiles to return an empty list if the response data is null
+
 ## [v0.14.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.0)
 * Prepare SDK for production releases
     * bump android support-annotations version
