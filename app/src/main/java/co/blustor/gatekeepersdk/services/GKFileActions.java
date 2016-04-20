@@ -244,8 +244,13 @@ public class GKFileActions {
         }
 
         private List<GKFile> parseFileList(byte[] response, String cardPath) {
-            String responseString = new String(response);
+            List<GKFile> filesList = new ArrayList<>();
 
+            if (response == null) {
+                return filesList;
+            }
+
+            String responseString = new String(response);
             Pattern pattern = Pattern.compile(".*\r\n");
             Matcher matcher = pattern.matcher(responseString);
 
@@ -254,8 +259,6 @@ public class GKFileActions {
             while (matcher.find()) {
                 list.add(matcher.group());
             }
-
-            List<GKFile> filesList = new ArrayList<>();
 
             for (String fileString : list) {
                 Matcher fileMatcher = GKFileUtils.FILE_PATTERN.matcher(fileString);
