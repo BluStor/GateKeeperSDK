@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.14.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.2)
+* Lower packet size from 512 bytes to 256 bytes
+
 ## [v0.14.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.1)
 * Fix GKFileActions.listFiles to return an empty list if the response data is null
 
