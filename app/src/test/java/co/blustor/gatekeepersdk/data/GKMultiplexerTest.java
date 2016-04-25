@@ -53,11 +53,11 @@ public class GKMultiplexerTest {
 
         multiplexer.writeToDataChannel(new ByteArrayInputStream(input));
 
-        // should write in 2 packets of up to 512 bytes each, so 5 extra bytes per packet
-        assertThat(outputStream.toByteArray().length, is(equalTo(523)));
-        byte[] firstPacketStart = {GKMultiplexer.DATA_CHANNEL, 2, 5, 'x'};
+        // should write in 2 packets of up to 256 bytes each, so 5 extra bytes per packet
+        assertThat(outputStream.toByteArray().length, is(equalTo(GKMultiplexer.MAXIMUM_PAYLOAD_SIZE + 11)));
+        byte[] firstPacketStart = {GKMultiplexer.DATA_CHANNEL, 1, 5, 'x'};
         assertThat(Arrays.copyOfRange(outputStream.toByteArray(), 0, 4), is(Matchers.equalTo(firstPacketStart)));
         byte[] secondPacket = {GKMultiplexer.DATA_CHANNEL, 0, 6, 'x', 0, 0};
-        assertThat(Arrays.copyOfRange(outputStream.toByteArray(), 517, 523), is(Matchers.equalTo(secondPacket)));
+        assertThat(Arrays.copyOfRange(outputStream.toByteArray(), GKMultiplexer.MAXIMUM_PAYLOAD_SIZE + 5, GKMultiplexer.MAXIMUM_PAYLOAD_SIZE + 11), is(Matchers.equalTo(secondPacket)));
     }
 }
