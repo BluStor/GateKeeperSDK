@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import co.blustor.gatekeepersdk.biometrics.GKFaces;
+import co.blustor.gatekeepersdk.data.GKFile;
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.devices.GKCard.Response;
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
@@ -447,14 +448,9 @@ public class GKAuthentication {
             List<String> templateList = new ArrayList<>();
 
             for (String fileString : lineList) {
-                Matcher fileMatcher = GKFileUtils.FILE_PATTERN.matcher(fileString);
-                if (fileMatcher.find()) {
-                    String typeString = fileMatcher.group(1);
-                    String name = fileMatcher.group(3);
-                    if (typeString.equals("d")) {
-                        continue;
-                    }
-                    templateList.add(name);
+                GKFile file = GKFileUtils.parseFile(fileString);
+                if (file != null && !file.isDirectory()) {
+                    templateList.add(file.getName());
                 }
             }
 

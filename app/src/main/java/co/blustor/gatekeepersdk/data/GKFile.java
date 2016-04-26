@@ -1,8 +1,5 @@
 package co.blustor.gatekeepersdk.data;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
@@ -10,29 +7,22 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  */
 public class GKFile {
     public static final String TAG = GKFile.class.getSimpleName();
-
-    /**
-     * The type of the entry on the GateKeeper Card.
-     */
-    public enum Type {
-        FILE,
-        DIRECTORY
-    }
-
     /**
      * The absolute path to the entry on the GateKeeper Card.
      */
     protected String mCardPath;
-
     /**
      * The name of the file.
      */
     protected String mName;
-
     /**
      * The {@code Type} of the file.
      */
     protected Type mType;
+    /**
+     * The size of the file.
+     */
+    private int mFileSize;
 
     /**
      * Create a {@code GKFile} with the given {@code name} and {@code type}.
@@ -44,6 +34,20 @@ public class GKFile {
     public GKFile(String name, Type type) {
         mName = name;
         mType = type;
+    }
+
+    /**
+     * Create a {@code GKFile} with the given {@code name} and {@code type}.
+     *
+     * @param name the {@code String} name of the file
+     * @param type the {@code Type} of the file
+     * @param fileSize the {@code int} size of the file in bytes
+     * @since 0.15.0
+     */
+    public GKFile(String name, Type type, int fileSize) {
+        mName = name;
+        mType = type;
+        mFileSize = fileSize;
     }
 
     /**
@@ -160,5 +164,23 @@ public class GKFile {
      */
     public void setCardPath(String parentPath, String fileName) {
         setCardPath(GKFileUtils.joinPath(parentPath, fileName));
+    }
+
+    /**
+     * Retrieve the size of the file as returned from the card.
+     *
+     * @return the {@code int} value of the file size
+     * @since 0.15.0
+     */
+    public int getFileSize() {
+        return mFileSize;
+    }
+
+    /**
+     * The type of the entry on the GateKeeper Card.
+     */
+    public enum Type {
+        FILE,
+        DIRECTORY
     }
 }

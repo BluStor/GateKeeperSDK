@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -261,12 +260,8 @@ public class GKFileActions {
             }
 
             for (String fileString : list) {
-                Matcher fileMatcher = GKFileUtils.FILE_PATTERN.matcher(fileString);
-                if (fileMatcher.find()) {
-                    String typeString = fileMatcher.group(1);
-                    String name = fileMatcher.group(3);
-                    GKFile.Type type = typeString.equals("d") ? GKFile.Type.DIRECTORY : GKFile.Type.FILE;
-                    GKFile file = new GKFile(name, type);
+                GKFile file = GKFileUtils.parseFile(fileString);
+                if (file != null) {
                     file.setCardPath(cardPath, file.getName());
                     filesList.add(file);
                 }
