@@ -8,28 +8,61 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import co.blustor.gatekeepersdk.data.GKFile;
 
 /**
  * GKFileUtils is a functional, static class intended for common operations
  * involving generic file attributes.
  */
 public class GKFileUtils {
-
     /**
      * Base path of the card
      */
     public static final String ROOT = "/data";
-
     /**
      * Base path for license storage
      */
     public static final String LICENSE_ROOT = "/license";
 
+    private static final String DIRECTORY_GROUP = "([-d])";
+    private static final String PERMISSIONS_GROUP = "\\S+";
+    private static final String LINKS_GROUP = "\\s+\\S+";
+    private static final String USER_GROUP = "\\s+\\S+";
+    private static final String GROUP_GROUP = "\\s+\\S+";
+    private static final String SIZE_GROUP = "\\s+(\\d+)";
+    private static final String MONTH_GROUP = "\\s+\\S+";
+    private static final String DAY_GROUP = "\\s+\\S+";
+    private static final String YEAR_GROUP = "\\s+\\S+";
+    private static final String NAME_GROUP = "\\s+(.*)";
     /**
      * Regex pattern for the return values of files
      */
-    public static final Pattern FILE_PATTERN = Pattern.compile("([-d])\\S+(\\S+\\s+){8}(.*)$");
+    public static final Pattern FILE_PATTERN = Pattern.compile(
+            DIRECTORY_GROUP + PERMISSIONS_GROUP +
+                    LINKS_GROUP + USER_GROUP + GROUP_GROUP +
+                    SIZE_GROUP + MONTH_GROUP + DAY_GROUP +
+                    YEAR_GROUP + NAME_GROUP + "$");
+
+    /**
+     * @param fileData the data returned from a LIST command
+     * @return a {@code GKFile} built from the fileData
+     * @since 0.15.0
+     */
+    public static GKFile parseFile(String fileData) {
+        Matcher fileMatcher = GKFileUtils.FILE_PATTERN.matcher(fileData);
+        if (fileMatcher.find()) {
+            String typeString = fileMatcher.group(1);
+            int size = Integer.parseInt(fileMatcher.group(2));
+            String name = fileMatcher.group(3);
+            GKFile.Type type = typeString.equals("d") ? GKFile.Type.DIRECTORY : GKFile.Type.FILE;
+            return new GKFile(name, type, size);
+        }
+
+        return null;
+    }
 
     /**
      * Join an array of {@link String} objects using the '/' path separator.
