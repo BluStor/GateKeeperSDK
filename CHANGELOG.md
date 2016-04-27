@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.15.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.15.0)
+* Add the file size to `GKFile` and populate it on `GKAuthentication.listFiles` commands
+
 ## [v0.14.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.14.2)
 * Lower packet size from 512 bytes to 256 bytes
 
