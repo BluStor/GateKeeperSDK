@@ -1,6 +1,9 @@
 package co.blustor.gatekeepersdk.services;
 
+import android.util.Log;
+
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -86,7 +89,7 @@ public class GKAuthentication {
      * Store a recovery code at the given template index on the GateKeeper Card.
      *
      * @param recoveryCode the String to be stored
-     * @param templateId the id at which to store the recovery code
+     * @param templateId   the id at which to store the recovery code
      * @return the {@code AuthResult} of the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
      * @since 0.10.0
@@ -422,10 +425,10 @@ public class GKAuthentication {
             if (mStatus == Status.UNAUTHORIZED) {
                 list.add(UNKNOWN_TEMPLATE);
             } else {
-                if (mResponse.getData() == null) {
+                if (mResponse.getDataFile() == null) {
                     return list;
                 }
-                List<String> templates = parseTemplateList(mResponse.getData());
+                List<String> templates = parseTemplateList(mResponse.getDataFile());
                 for (String template : templates) {
                     list.add(template);
                 }
@@ -433,11 +436,11 @@ public class GKAuthentication {
             return list;
         }
 
-        private List<String> parseTemplateList(byte[] response) {
-            String responseString = new String(response);
+        private List<String> parseTemplateList(File dataFile) {
+            String response = readDataFile(dataFile);
 
-            Pattern pattern = Pattern.compile(".*\r\n");
-            Matcher matcher = pattern.matcher(responseString);
+            Pattern pattern = Pattern.compile(GKFileUtils.DATA_LINE_PATTERN);
+            Matcher matcher = pattern.matcher(response);
 
             List<String> lineList = new ArrayList<>();
 
@@ -455,6 +458,15 @@ public class GKAuthentication {
             }
 
             return templateList;
+        }
+
+        private String readDataFile(File dataFile) {
+            try {
+                return GKFileUtils.readFile(dataFile);
+            } catch (IOException e) {
+                Log.e(TAG, "Error reading data file", e);
+                return "";
+            }
         }
     }
 }
