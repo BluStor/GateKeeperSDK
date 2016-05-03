@@ -171,6 +171,10 @@ public class GKCardSettings {
         }
 
         private String parseVersion(String versionPattern) {
+            if (mResponse.getData() == null) {
+                return null;
+            }
+
             String data = new String(mResponse.getData());
             Pattern pattern = Pattern.compile(versionPattern);
             Matcher matcher = pattern.matcher(data);
