@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.15.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.15.1)
+* Fix issue where `GKCardSettings.getFirmwareInformation` would throw exception if response was not success
+
 ## [v0.15.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.15.0)
 * Add the file size to `GKFile` and populate it on `GKAuthentication.listFiles` commands
 
