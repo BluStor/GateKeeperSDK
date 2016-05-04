@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.15.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.15.2)
+* Return `SUCCESS` status for 226 code in `GKCardSettings`
+
 ## [v0.15.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.15.1)
 * Fix issue where `GKCardSettings.getFirmwareInformation` would throw exception if response was not success
 
