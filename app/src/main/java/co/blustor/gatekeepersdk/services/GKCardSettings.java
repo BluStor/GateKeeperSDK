@@ -121,6 +121,8 @@ public class GKCardSettings {
             switch (response.getStatus()) {
                 case 213:
                     return Status.SUCCESS;
+                case 226:
+                    return Status.SUCCESS;
                 case 501:
                     return Status.INVALID_DATA;
                 case 530:

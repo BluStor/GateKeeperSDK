@@ -25,6 +25,7 @@ public class GKCardSettingsTest {
         GKCardSettings settings = new GKCardSettings(card);
         GKCardSettings.FirmwareInformationResult result = settings.getFirmwareInformation();
 
+        assertThat(result.getStatus(), equalTo(GKCardSettings.Status.SUCCESS));
         assertThat(result.getBootVersion(), equalTo("2.0"));
         assertThat(result.getFirmwareVersion(), equalTo("0.4.0"));
     }
