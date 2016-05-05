@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.16.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.0)
+* write all data from data channel directly to file, do not store in buffer
+    * This caused an issue where large enough files would blow up the heap, which is limited on most
+     android devices. This replaces all of the threaded packet buffering with simply writing
+     commands and reading responses in a synchronous manner.
+* `GKBluetoothCard` requires a dataCacheDir to store downloaded data in, which should normally be `context.getExternalCacheDir`
+
 ## [v0.15.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.15.2)
 * Return `SUCCESS` status for 226 code in `GKCardSettings`
 
