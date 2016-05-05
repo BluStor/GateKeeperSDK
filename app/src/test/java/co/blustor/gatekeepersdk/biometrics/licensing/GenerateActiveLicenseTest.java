@@ -2,7 +2,6 @@ package co.blustor.gatekeepersdk.biometrics.licensing;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.util.io.IOUtil;
@@ -21,6 +20,7 @@ import co.blustor.gatekeepersdk.data.GKFile;
 import co.blustor.gatekeepersdk.services.GKFileActions;
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
 import co.blustor.gatekeepersdk.utils.GKStringUtils;
+import co.blustor.gatekeepersdk.utils.TestFileUtil;
 
 import static junit.framework.Assert.fail;
 import static org.hamcrest.Matchers.equalTo;
@@ -54,7 +54,7 @@ public class GenerateActiveLicenseTest {
         licenseManager = mock(BiometricLicenseManager.class);
         subject = new GenerateActiveLicense(licenseManager, fileActions, licenseSubdir);
 
-        tempSerialNumberFile = File.createTempFile("test-serial", LicenseFileExtensions.SERIAL_NUMBER);
+        tempSerialNumberFile = TestFileUtil.buildTempFile();
         FileWriter serialWriter = new FileWriter(tempSerialNumberFile);
         serialWriter.write(serialContents);
         serialWriter.close();
@@ -84,11 +84,6 @@ public class GenerateActiveLicenseTest {
 
         when(licenseManager.generateID(serialContents)).thenReturn(idContents);
         when(licenseManager.activateOnline(idContents)).thenReturn(licenseContents);
-    }
-
-    @After
-    public void tearDown() {
-        tempSerialNumberFile.delete();
     }
 
     @Test(expected = IOException.class)

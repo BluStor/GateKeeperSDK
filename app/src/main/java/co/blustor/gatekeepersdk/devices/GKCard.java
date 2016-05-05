@@ -1,5 +1,6 @@
 package co.blustor.gatekeepersdk.devices;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -16,6 +17,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response list(String cardPath) throws IOException;
+
     /**
      * Send a `get` action to the GateKeeper Card.
      *
@@ -25,6 +27,18 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response get(String cardPath) throws IOException;
+
+    /**
+     * Send a `get` action to the GateKeeper Card.
+     *
+     * @param cardPath the path used in the action
+     * @param localFile the local file used to store the response data
+     * @return a {@code Response} with information about the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.16.0
+     */
+    Response get(String cardPath, File localFile) throws IOException;
+
     /**
      * Send a `put` action to the GateKeeper Card.
      *
@@ -35,6 +49,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response put(String cardPath, InputStream inputStream) throws IOException;
+
     /**
      * Send a `delete` action to the GateKeeper Card.
      *
@@ -44,6 +59,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response delete(String cardPath) throws IOException;
+
     /**
      * Send a `createPath` action to the GateKeeper Card.
      *
@@ -53,6 +69,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response createPath(String cardPath) throws IOException;
+
     /**
      * Send a `deletePath` action to the GateKeeper Card.
      *
@@ -62,6 +79,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response deletePath(String cardPath) throws IOException;
+
     /**
      * Send a `finalize` action to the GateKeeper Card.
      *
@@ -71,6 +89,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     Response finalize(String cardPath) throws IOException;
+
     /**
      * Open a connection with the GateKeeper Card.
      *
@@ -78,6 +97,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     void connect() throws IOException;
+
     /**
      * Close the connection with the GateKeeper Card.
      *
@@ -85,6 +105,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     void disconnect() throws IOException;
+
     /**
      * Get the current state of the connection between this object and the GateKeeper Card.
      *
@@ -93,11 +114,14 @@ public interface GKCard {
      * @since 0.5.0
      */
     ConnectionState getConnectionState();
+
     /**
      * Intended for internal use only.
+     *
      * @param state the {@code ConnectionState} that describes the new state of the connection
      */
     void onConnectionChanged(ConnectionState state);
+
     /**
      * Add a {@code Monitor} to be informed about changes to the state of the GateKeeper Card.
      *
@@ -105,6 +129,7 @@ public interface GKCard {
      * @since 0.5.0
      */
     void addMonitor(Monitor monitor);
+
     /**
      * Remove a {@code Monitor} from the {@code GKCard}.
      *
@@ -183,20 +208,20 @@ public interface GKCard {
         protected String mMessage;
 
         /**
-         * Any data received during execution of the action.
+         * The {@code File} representing the location that any data is stored from a response
          */
-        protected byte[] mData;
+        protected File mDataFile;
 
         /**
          * Create a {@code Response} with the basic attributes of the given {@code Response}.
          *
          * @param response the {@code Response} object to copy
-         * @since 0.5.0
+         * @since 0.16.0
          */
         public Response(Response response) {
             mStatus = response.getStatus();
             mMessage = response.getMessage();
-            mData = response.getData();
+            mDataFile = response.getDataFile();
         }
 
         /**
@@ -212,6 +237,20 @@ public interface GKCard {
         }
 
         /**
+         * Create a {@code Response} with the given status code, message, and dataFile.
+         *
+         * @param status   the numeric status code to classify this response
+         * @param message  the {@code String} message to describe this response
+         * @param dataFile the {@code File} that holds body data for this response
+         * @since 0.16.0
+         */
+        public Response(int status, String message, File dataFile) {
+            mStatus = status;
+            mMessage = message;
+            mDataFile = dataFile;
+        }
+
+        /**
          * Create a {@code Response} with the given command data.
          *
          * @param commandData the data containing the status code and message
@@ -224,18 +263,18 @@ public interface GKCard {
         /**
          * Create a {@code Response} with the given command and body data.
          *
-         * @param commandData the data containing the status code and message
-         * @param bodyData    the data of the body
-         * @since 0.5.0
+         * @param commandData  the data containing the status code and message
+         * @param bodyDataFile the {@code File} containing body data
+         * @since 0.16.0
          */
-        public Response(byte[] commandData, byte[] bodyData) {
+        public Response(byte[] commandData, File bodyDataFile) {
             String responseString = new String(commandData);
             String[] split = responseString.split("\\s", 2);
             mStatus = Integer.parseInt(split[0]);
             if (split.length > 1) {
                 mMessage = split[1];
             }
-            mData = bodyData;
+            mDataFile = bodyDataFile;
         }
 
         /**
@@ -271,21 +310,21 @@ public interface GKCard {
         /**
          * Retrieve the body data of the Response.
          *
-         * @return the body data
-         * @since 0.5.0
+         * @return the {@code File} that hold the response data
+         * @since 0.16.0
          */
-        public byte[] getData() {
-            return mData;
+        public File getDataFile() {
+            return mDataFile;
         }
 
         /**
-         * Assign the body data of the Response.
+         * Assign the file that holds the Response data.
          *
-         * @param data the body data
-         * @since 0.5.0
+         * @param dataFile the {@code File} that holds response data
+         * @since 0.16.0
          */
-        public void setData(byte[] data) {
-            mData = data;
+        public void setDataFile(File dataFile) {
+            mDataFile = dataFile;
         }
     }
 

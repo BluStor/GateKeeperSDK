@@ -3,12 +3,13 @@ package co.blustor.gatekeepersdk.services;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import co.blustor.gatekeepersdk.biometrics.GKFaces;
 import co.blustor.gatekeepersdk.devices.GKCard;
+import co.blustor.gatekeepersdk.utils.TestFileUtil;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,7 +29,7 @@ public class GKAuthenticationTest {
     private GKCard fakeCard = mock(GKCard.class);
 
     @Test
-    public void revokeRecoveryCodeRetunsSuccessWhenAuthenticatedTest() throws Exception {
+    public void revokeRecoveryCodeReturnsSuccessWhenAuthenticatedTest() throws Exception {
         when(fakeCard.delete(GKAuthentication.ENROLL_RECOVERY_CODE_PATH_PREFIX + "1"))
                 .thenReturn(new GKCard.Response(250, "RecoveryCode Unset"));
 
@@ -96,17 +97,31 @@ public class GKAuthenticationTest {
     @Test
     public void listFaceTemplatesResultReturnsAllTemplates() throws IOException {
         GKCard.Response fakeResponse = mock(GKCard.Response.class);
-        String data = "-rw-rw-rw-   1 root  root       4026 Dec 16  2015 1\r\n";
-        when(fakeResponse.getData()).thenReturn(data.getBytes(StandardCharsets.UTF_8));
+        File dataFile = TestFileUtil.buildTempFile();
+        String data = "-rw-rw-rw-   1 root  root       4026 Dec 16  2015 template-name\r\n" +
+                "-rw-rw-rw-   1 root  root       4026 Dec 16  2015 other-template-name\n";
+        TestFileUtil.writeToFile(dataFile, data);
+        when(fakeResponse.getDataFile()).thenReturn(dataFile);
         when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
         GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listFaceTemplates();
-        assertThat(listTemplatesResult.getTemplates(), hasItem(equalTo("1")));
+        assertThat(listTemplatesResult.getTemplates(), hasItem(equalTo("template-name")));
+        assertThat(listTemplatesResult.getTemplates(), hasItem(equalTo("other-template-name")));
     }
 
     @Test
-    public void returnsEmptyListWhenGetDataIsNull() throws IOException {
+    public void returnsEmptyListWhenDataFileIsNull() throws IOException {
         GKCard.Response fakeResponse = mock(GKCard.Response.class);
-        when(fakeResponse.getData()).thenReturn(null);
+        when(fakeResponse.getDataFile()).thenReturn(null);
+        when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
+        GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listFaceTemplates();
+        assertThat(listTemplatesResult.getTemplates(), is(empty()));
+    }
+
+    @Test
+    public void returnsEmptyListWhenDataFileIsEmpty() throws IOException {
+        GKCard.Response fakeResponse = mock(GKCard.Response.class);
+        File dataFile = TestFileUtil.buildTempFile();
+        when(fakeResponse.getDataFile()).thenReturn(dataFile);
         when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
         GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listFaceTemplates();
         assertThat(listTemplatesResult.getTemplates(), is(empty()));

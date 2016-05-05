@@ -47,6 +47,11 @@ public class GKFileUtils {
                     YEAR_GROUP + NAME_GROUP + "$");
 
     /**
+     * Regex pattern for parsing data files by line
+     */
+    public static final String DATA_LINE_PATTERN = "(.*)(\r\n|\n)";
+
+    /**
      * @param fileData the data returned from a LIST command
      * @return a {@code GKFile} built from the fileData
      * @since 0.15.0

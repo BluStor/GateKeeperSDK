@@ -1,5 +1,7 @@
 package co.blustor.gatekeepersdk.services;
 
+import android.util.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -7,6 +9,7 @@ import java.util.regex.Pattern;
 
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.devices.GKCard.Response;
+import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
  * GKCardSettings is a Service for handling GateKeeper Card configuration data.
@@ -88,12 +91,12 @@ public class GKCardSettings {
         /**
          * The {@code Response} received from the GateKeeper Card.
          */
-        protected final Response mResponse;
+        protected Response mResponse;
 
         /**
          * The {@code Status} of the action.
          */
-        protected final Status mStatus;
+        protected Status mStatus;
 
         /**
          * Create an {@code CardResult} to interpret the {@code Response}
@@ -134,11 +137,12 @@ public class GKCardSettings {
     }
 
     public static class FirmwareInformationResult extends CardResult {
+        private static final String TAG = FirmwareInformationResult.class.getCanonicalName();
         private static final String BOOT_VERSION_PATTERN = "BOOT:\\s*(\\S*)";
         private static final String FIRMWARE_VERSION_PATTERN = "FIRM:\\s*(\\S*)";
 
-        private final String mBootVersion;
-        private final String mFirmwareVersion;
+        private String mBootVersion;
+        private String mFirmwareVersion;
 
         /**
          * Create an {@code CardResult} to interpret the {@code Response}
@@ -150,6 +154,10 @@ public class GKCardSettings {
             super(response);
             mBootVersion = parseVersion(BOOT_VERSION_PATTERN);
             mFirmwareVersion = parseVersion(FIRMWARE_VERSION_PATTERN);
+
+            if (mStatus == Status.SUCCESS && (mBootVersion == null || mFirmwareVersion == null)) {
+                mStatus = Status.UNKNOWN_STATUS;
+            }
         }
 
         /**
@@ -173,14 +181,19 @@ public class GKCardSettings {
         }
 
         private String parseVersion(String versionPattern) {
-            if (mResponse.getData() == null) {
+            if (mResponse.getDataFile() == null) {
                 return null;
             }
 
-            String data = new String(mResponse.getData());
-            Pattern pattern = Pattern.compile(versionPattern);
-            Matcher matcher = pattern.matcher(data);
-            return matcher.find() ? matcher.group(1) : null;
+            try {
+                String data = GKFileUtils.readFile(mResponse.getDataFile());
+                Pattern pattern = Pattern.compile(versionPattern);
+                Matcher matcher = pattern.matcher(data);
+                return matcher.find() ? matcher.group(1) : null;
+            } catch (IOException e) {
+                Log.e(TAG, "Error reading response data", e);
+                return null;
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 package co.blustor.gatekeepersdk.biometrics.licensing;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,6 +9,7 @@ import java.io.IOException;
 
 import co.blustor.gatekeepersdk.data.GKFile;
 import co.blustor.gatekeepersdk.services.GKFileActions;
+import co.blustor.gatekeepersdk.utils.TestFileUtil;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -31,17 +31,12 @@ public class FetchExistingLicenseTest {
         fileActions = mock(GKFileActions.class);
         subject = new FetchExistingLicense(fileActions);
 
-        tempLicenseFile = File.createTempFile("test-license", LicenseFileExtensions.LICENSE);
+        tempLicenseFile = TestFileUtil.buildTempFile();
         FileWriter licenseWriter = new FileWriter(tempLicenseFile);
         licenseWriter.write(licenseContents);
         licenseWriter.close();
 
         licenseFile = new GKFile("test.lic", GKFile.Type.FILE);
-    }
-
-    @After
-    public void tearDown() {
-        tempLicenseFile.delete();
     }
 
     @Test(expected = IOException.class)

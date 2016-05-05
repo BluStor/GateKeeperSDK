@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -35,6 +36,7 @@ public class GKBluetoothCard implements GKCard {
     private static final String SRFT = "SRFT";
 
     private final String mCardName;
+    private File mDataCacheDir;
     private GKMultiplexer mMultiplexer;
     private List<Monitor> mCardMonitors = new ArrayList<>();
 
@@ -45,21 +47,29 @@ public class GKBluetoothCard implements GKCard {
      * Create a {@code GKBluetoothCard} to connect with the GateKeeper Card having the
      * given name.
      *
-     * @param cardName the Bluetooth pairing name of the GateKeeper Card
+     * @param cardName     the Bluetooth pairing name of the GateKeeper Card
+     * @param dataCacheDir a {@code File} that contains the location to create temporary files to store response data.
+     *                     Ex: context.getExternalCacheDir()
      */
-    public GKBluetoothCard(String cardName) {
+    public GKBluetoothCard(String cardName, File dataCacheDir) {
         mCardName = cardName;
+        mDataCacheDir = dataCacheDir;
     }
 
     @Override
     public Response list(String cardPath) throws IOException {
         cardPath = globularPath(cardPath);
-        return get(LIST, cardPath);
+        return get(LIST, cardPath, createDataFile());
     }
 
     @Override
     public Response get(String cardPath) throws IOException {
-        return get(RETR, cardPath);
+        return get(RETR, cardPath, createDataFile());
+    }
+
+    @Override
+    public Response get(String cardPath, File localFile) throws IOException {
+        return get(RETR, cardPath, localFile);
     }
 
     @Override
@@ -119,7 +129,6 @@ public class GKBluetoothCard implements GKCard {
                 InputStream inputStream = mBluetoothSocket.getInputStream();
                 OutputStream outputStream = mBluetoothSocket.getOutputStream();
                 mMultiplexer = new GKMultiplexer(inputStream, outputStream);
-                mMultiplexer.connect();
                 onConnectionChanged(ConnectionState.CONNECTED);
             } catch (IOException e) {
                 mMultiplexer = null;
@@ -134,7 +143,7 @@ public class GKBluetoothCard implements GKCard {
         onConnectionChanged(ConnectionState.DISCONNECTING);
         if (mMultiplexer != null) {
             try {
-                mMultiplexer.disconnect();
+                mMultiplexer.cleanup();
             } finally {
                 mMultiplexer = null;
             }
@@ -190,7 +199,7 @@ public class GKBluetoothCard implements GKCard {
         return mMultiplexer == null || mBluetoothSocket == null || !mBluetoothSocket.isConnected();
     }
 
-    private Response get(String method, String cardPath) throws IOException {
+    private Response get(String method, String cardPath, File dataFile) throws IOException {
         try {
             onConnectionChanged(ConnectionState.TRANSFERRING);
             sendCommand(method, cardPath);
@@ -200,9 +209,8 @@ public class GKBluetoothCard implements GKCard {
                 return commandResponse;
             }
 
-            Response dataResponse = getCommandResponse();
-            byte[] data = mMultiplexer.readDataChannel();
-            dataResponse.setData(data);
+            Response dataResponse = new Response(mMultiplexer.readDataChannelToFile(dataFile), dataFile);
+            Log.i(TAG, "Card Response: '" + dataResponse.getStatusMessage() + "'");
             onConnectionChanged(ConnectionState.CONNECTED);
             return dataResponse;
         } catch (InterruptedException e) {
@@ -210,6 +218,10 @@ public class GKBluetoothCard implements GKCard {
             onConnectionChanged(ConnectionState.CONNECTED);
             return new AbortResponse();
         }
+    }
+
+    private File createDataFile() throws IOException {
+        return File.createTempFile("data", "tmp", mDataCacheDir);
     }
 
     private Response call(String method, String cardPath) throws IOException {
