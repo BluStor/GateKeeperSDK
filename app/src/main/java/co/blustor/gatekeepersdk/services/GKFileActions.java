@@ -1,7 +1,8 @@
 package co.blustor.gatekeepersdk.services;
 
+import android.util.Log;
+
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -56,13 +57,8 @@ public class GKFileActions {
      */
     public GetFileResult getFile(final GKFile file, File localFile) throws IOException {
         mCard.connect();
-        Response response = mCard.get(file.getCardPath());
-        GetFileResult result = new GetFileResult(response, localFile);
-        if (result.getStatus() == Status.SUCCESS) {
-            FileOutputStream outputStream = new FileOutputStream(localFile);
-            outputStream.write(response.getData());
-        }
-        return result;
+        Response response = mCard.get(file.getCardPath(), localFile);
+        return new GetFileResult(response, localFile);
     }
 
     /**
@@ -229,7 +225,7 @@ public class GKFileActions {
          */
         public ListFilesResult(Response response, String cardPath) {
             super(response);
-            mFiles = parseFileList(response.getData(), cardPath);
+            mFiles = parseFileList(response.getDataFile(), cardPath);
         }
 
         /**
@@ -242,16 +238,16 @@ public class GKFileActions {
             return mFiles;
         }
 
-        private List<GKFile> parseFileList(byte[] response, String cardPath) {
+        private List<GKFile> parseFileList(File dataFile, String cardPath) {
             List<GKFile> filesList = new ArrayList<>();
 
-            if (response == null) {
+            if (dataFile == null) {
                 return filesList;
             }
 
-            String responseString = new String(response);
-            Pattern pattern = Pattern.compile(".*\r\n");
-            Matcher matcher = pattern.matcher(responseString);
+            String response = readDataFile(dataFile);
+            Pattern pattern = Pattern.compile(GKFileUtils.DATA_LINE_PATTERN);
+            Matcher matcher = pattern.matcher(response);
 
             List<String> list = new ArrayList<>();
 
@@ -268,6 +264,15 @@ public class GKFileActions {
             }
 
             return filesList;
+        }
+
+        private String readDataFile(File dataFile) {
+            try {
+                return GKFileUtils.readFile(dataFile);
+            } catch (IOException e) {
+                Log.e(TAG, "Error reading data file", e);
+                return "";
+            }
         }
     }
 
