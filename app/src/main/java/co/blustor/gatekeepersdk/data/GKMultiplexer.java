@@ -15,7 +15,7 @@ import java.util.Arrays;
  */
 public class GKMultiplexer {
     public static final String TAG = GKMultiplexer.class.getSimpleName();
-    public static final int MAXIMUM_PAYLOAD_SIZE = 256;
+    public static final int MAXIMUM_PAYLOAD_SIZE = 512;
     public static final int COMMAND_CHANNEL = 1;
     public static final int DATA_CHANNEL = 2;
 
