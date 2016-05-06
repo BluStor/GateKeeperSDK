@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.16.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.1)
+* Put packet size back to 512B to speed up uploads
+
 ## [v0.16.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.0)
 * write all data from data channel directly to file, do not store in buffer
     * This caused an issue where large enough files would blow up the heap, which is limited on most
