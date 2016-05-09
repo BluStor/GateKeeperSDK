@@ -75,6 +75,7 @@ public class GKBluetoothCard implements GKCard {
     @Override
     public Response put(String cardPath, InputStream inputStream) throws IOException {
         try {
+            connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
             sendCommand(STOR, cardPath);
             Response commandResponse = getCommandResponse();
@@ -90,6 +91,9 @@ public class GKBluetoothCard implements GKCard {
             logCommandInterruption(STOR, cardPath, e);
             onConnectionChanged(ConnectionState.CONNECTED);
             return new AbortResponse();
+        } catch (IOException e) {
+            disconnect();
+            throw e;
         }
     }
 
@@ -201,6 +205,7 @@ public class GKBluetoothCard implements GKCard {
 
     private Response get(String method, String cardPath, File dataFile) throws IOException {
         try {
+            connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
             sendCommand(method, cardPath);
             Response commandResponse = getCommandResponse();
@@ -217,6 +222,9 @@ public class GKBluetoothCard implements GKCard {
             logCommandInterruption(method, cardPath, e);
             onConnectionChanged(ConnectionState.CONNECTED);
             return new AbortResponse();
+        } catch (IOException e) {
+            disconnect();
+            throw e;
         }
     }
 
@@ -226,6 +234,7 @@ public class GKBluetoothCard implements GKCard {
 
     private Response call(String method, String cardPath) throws IOException {
         try {
+            connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
             sendCommand(method, cardPath);
             Response commandResponse = getCommandResponse();
@@ -235,6 +244,9 @@ public class GKBluetoothCard implements GKCard {
             logCommandInterruption(method, cardPath, e);
             onConnectionChanged(ConnectionState.CONNECTED);
             return new AbortResponse();
+        } catch (IOException e) {
+            disconnect();
+            throw e;
         }
     }
 

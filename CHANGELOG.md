@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.16.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.2)
+* Fully disconnect on IOExceptions and verify connection before all card calls
+
 ## [v0.16.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.1)
 * Put packet size back to 512B to speed up uploads
 
