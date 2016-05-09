@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.16.3](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.3)
+* Write downloaded files to temp files, then copy to the final location
+    * This prevents partially downloaded files from appearing in the device Downloads directory
+
 ## [v0.16.2](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.2)
 * Fully disconnect on IOExceptions and verify connection before all card calls
 
