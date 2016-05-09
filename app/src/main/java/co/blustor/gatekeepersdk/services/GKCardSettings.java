@@ -39,7 +39,6 @@ public class GKCardSettings {
      * @since 0.5.0
      */
     public CardResult updateFirmware(InputStream inputStream) throws IOException {
-        mCard.connect();
         Response response = mCard.put(UPDATE_FIRMWARE_PATH, inputStream);
         if (response.getStatus() != 226) {
             return new CardResult(response);
@@ -56,7 +55,6 @@ public class GKCardSettings {
      * @since 0.6.0
      */
     public FirmwareInformationResult getFirmwareInformation() throws IOException {
-        mCard.connect();
         Response response = mCard.get(GET_FIRMWARE_INFO_PATH);
         return new FirmwareInformationResult(response);
     }

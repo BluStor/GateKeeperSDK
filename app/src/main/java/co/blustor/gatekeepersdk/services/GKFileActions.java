@@ -41,7 +41,6 @@ public class GKFileActions {
      * @since 0.5.0
      */
     public ListFilesResult listFiles(String cardPath) throws IOException {
-        mCard.connect();
         Response response = mCard.list(cardPath);
         return new ListFilesResult(response, cardPath);
     }
@@ -56,7 +55,6 @@ public class GKFileActions {
      * @since 0.5.0
      */
     public GetFileResult getFile(final GKFile file, File localFile) throws IOException {
-        mCard.connect();
         Response response = mCard.get(file.getCardPath(), localFile);
         return new GetFileResult(response, localFile);
     }
@@ -71,7 +69,6 @@ public class GKFileActions {
      * @since 0.5.0
      */
     public PutFileResult putFile(InputStream localFile, String cardPath) throws IOException {
-        mCard.connect();
         Response response = mCard.put(cardPath, localFile);
         if (response.getStatus() != 226) {
             return new PutFileResult(response);
@@ -89,7 +86,6 @@ public class GKFileActions {
      * @since 0.5.0
      */
     public FileResult deleteFile(GKFile file) throws IOException {
-        mCard.connect();
         Response response;
         if (file.getType() == GKFile.Type.FILE) {
             response = mCard.delete(file.getCardPath());
@@ -108,7 +104,6 @@ public class GKFileActions {
      * @since 0.5.0
      */
     public FileResult makeDirectory(String cardPath) throws IOException {
-        mCard.connect();
         Response response = mCard.createPath(cardPath);
         return new FileResult(response);
     }

@@ -135,7 +135,6 @@ public class GKAuthentication {
      * @since 0.5.0
      */
     public AuthResult signOut() throws IOException {
-        mCard.connect();
         Response response = mCard.delete(SIGN_OUT_PATH);
         return new AuthResult(response);
     }
@@ -160,7 +159,6 @@ public class GKAuthentication {
      * @since 0.5.0
      */
     public AuthResult revokeFace(String templateId) throws IOException {
-        mCard.connect();
         Response response = mCard.delete(REVOKE_FACE_PATH_PREFIX + templateId);
         return new AuthResult(response);
     }
@@ -185,7 +183,6 @@ public class GKAuthentication {
      * @since 0.6.1
      */
     public AuthResult revokeRecoveryCode(String templateId) throws IOException {
-        mCard.connect();
         return new AuthResult(mCard.delete(REVOKE_RECOVERY_CODE_PATH_PREFIX + templateId));
     }
 
@@ -197,7 +194,6 @@ public class GKAuthentication {
      * @since 0.9.0
      */
     public ListTemplatesResult listFaceTemplates() throws IOException {
-        mCard.connect();
         Response response = mCard.list(LIST_FACE_PATH);
         return new ListTemplatesResult(response);
     }
@@ -210,7 +206,6 @@ public class GKAuthentication {
      * @since 0.9.0
      */
     public ListTemplatesResult listRecoveryCodeTemplates() throws IOException {
-        mCard.connect();
         Response response = mCard.list(LIST_RECOVERY_CODE_PATH);
         return new ListTemplatesResult(response);
     }
@@ -227,7 +222,6 @@ public class GKAuthentication {
 
     private AuthResult submitInputStream(InputStream inputStream, String cardPath) throws IOException {
         try {
-            mCard.connect();
             Response response = mCard.put(cardPath, inputStream);
             if (response.getStatus() != 226) {
                 return new AuthResult(response);
