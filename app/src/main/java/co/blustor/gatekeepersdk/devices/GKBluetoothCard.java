@@ -8,9 +8,12 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,17 +62,19 @@ public class GKBluetoothCard implements GKCard {
     @Override
     public Response list(String cardPath) throws IOException {
         cardPath = globularPath(cardPath);
-        return get(LIST, cardPath, createDataFile());
+        return get(LIST, cardPath);
     }
 
     @Override
     public Response get(String cardPath) throws IOException {
-        return get(RETR, cardPath, createDataFile());
+        return get(RETR, cardPath);
     }
 
     @Override
     public Response get(String cardPath, File localFile) throws IOException {
-        return get(RETR, cardPath, localFile);
+        Response response = get(RETR, cardPath);
+        copyResponseDataToLocalFile(response, localFile);
+        return response;
     }
 
     @Override
@@ -203,8 +208,9 @@ public class GKBluetoothCard implements GKCard {
         return mMultiplexer == null || mBluetoothSocket == null || !mBluetoothSocket.isConnected();
     }
 
-    private Response get(String method, String cardPath, File dataFile) throws IOException {
+    private Response get(String method, String cardPath) throws IOException {
         try {
+            File dataFile = createDataFile();
             connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
             sendCommand(method, cardPath);
@@ -225,6 +231,25 @@ public class GKBluetoothCard implements GKCard {
         } catch (IOException e) {
             disconnect();
             throw e;
+        }
+    }
+
+    private void copyResponseDataToLocalFile(Response response, File localFile) throws IOException {
+        File tempDataFile = response.getDataFile();
+        FileChannel src = null;
+        FileChannel dest = null;
+        try {
+            src = new FileInputStream(tempDataFile).getChannel();
+            dest = new FileOutputStream(localFile).getChannel();
+            dest.transferFrom(src, 0, src.size());
+        } finally {
+            response.setDataFile(localFile);
+            if (src != null) {
+                src.close();
+            }
+            if (dest != null) {
+                dest.close();
+            }
         }
     }
 
