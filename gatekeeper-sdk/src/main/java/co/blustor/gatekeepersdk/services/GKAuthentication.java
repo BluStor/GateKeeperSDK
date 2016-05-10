@@ -1,9 +1,6 @@
 package co.blustor.gatekeepersdk.services;
 
-import android.util.Log;
-
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -419,10 +416,7 @@ public class GKAuthentication {
             if (mStatus == Status.UNAUTHORIZED) {
                 list.add(UNKNOWN_TEMPLATE);
             } else {
-                if (mResponse.getDataFile() == null) {
-                    return list;
-                }
-                List<String> templates = parseTemplateList(mResponse.getDataFile());
+                List<String> templates = parseTemplateList();
                 for (String template : templates) {
                     list.add(template);
                 }
@@ -430,8 +424,8 @@ public class GKAuthentication {
             return list;
         }
 
-        private List<String> parseTemplateList(File dataFile) {
-            String response = readDataFile(dataFile);
+        private List<String> parseTemplateList() {
+            String response = mResponse.readDataFile();
 
             Pattern pattern = Pattern.compile(GKFileUtils.DATA_LINE_PATTERN);
             Matcher matcher = pattern.matcher(response);
@@ -452,15 +446,6 @@ public class GKAuthentication {
             }
 
             return templateList;
-        }
-
-        private String readDataFile(File dataFile) {
-            try {
-                return GKFileUtils.readFile(dataFile);
-            } catch (IOException e) {
-                Log.e(TAG, "Error reading data file", e);
-                return "";
-            }
         }
     }
 }

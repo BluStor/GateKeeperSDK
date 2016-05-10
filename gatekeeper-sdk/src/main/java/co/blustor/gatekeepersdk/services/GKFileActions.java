@@ -1,7 +1,5 @@
 package co.blustor.gatekeepersdk.services;
 
-import android.util.Log;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -220,7 +218,7 @@ public class GKFileActions {
          */
         public ListFilesResult(Response response, String cardPath) {
             super(response);
-            mFiles = parseFileList(response.getDataFile(), cardPath);
+            mFiles = parseFileList(cardPath);
         }
 
         /**
@@ -233,16 +231,12 @@ public class GKFileActions {
             return mFiles;
         }
 
-        private List<GKFile> parseFileList(File dataFile, String cardPath) {
+        private List<GKFile> parseFileList(String cardPath) {
             List<GKFile> filesList = new ArrayList<>();
 
-            if (dataFile == null) {
-                return filesList;
-            }
-
-            String response = readDataFile(dataFile);
+            String responseData = mResponse.readDataFile();
             Pattern pattern = Pattern.compile(GKFileUtils.DATA_LINE_PATTERN);
-            Matcher matcher = pattern.matcher(response);
+            Matcher matcher = pattern.matcher(responseData);
 
             List<String> list = new ArrayList<>();
 
@@ -259,15 +253,6 @@ public class GKFileActions {
             }
 
             return filesList;
-        }
-
-        private String readDataFile(File dataFile) {
-            try {
-                return GKFileUtils.readFile(dataFile);
-            } catch (IOException e) {
-                Log.e(TAG, "Error reading data file", e);
-                return "";
-            }
         }
     }
 

@@ -143,6 +143,7 @@ bintray {
 dependencies {
     compile fileTree(include: ['*.jar'], exclude: ['*javadoc.jar'], dir: 'libs')
     compile 'com.android.support:support-annotations:23.4.0'
+    compile 'com.google.code.gson:gson:2.6.2'
     testCompile 'junit:junit:4.12'
     testCompile 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testCompile 'org.mockito:mockito-core:2.0.41-beta'
