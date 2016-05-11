@@ -2,10 +2,14 @@ package co.blustor.gatekeepersdk.services;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
+import co.blustor.gatekeepersdk.data.GKCardConfiguration;
 import co.blustor.gatekeepersdk.devices.GKBluetoothCard;
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.utils.TestFileUtil;
@@ -14,7 +18,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class GKCardSettingsTest {
@@ -88,5 +96,42 @@ public class GKCardSettingsTest {
 
         assertThat(result.getStatus(), is(GKCardSettings.Status.SUCCESS));
         assertThat(result.getCardConfig().getAuthTimeout(), is(300));
+    }
+
+    @Test
+    public void updateCardSettingsSendsTheConfigJsonToTheCard() throws IOException {
+        final String json = "{}";
+        GKCardConfiguration config = mock(GKCardConfiguration.class);
+        when(config.getConfigJson()).thenReturn(json);
+        when(card.put(eq("/device/settings"), any(InputStream.class))).thenAnswer(new Answer<GKCard.Response>() {
+            @Override
+            public GKCard.Response answer(InvocationOnMock invocation) throws Throwable {
+                InputStream inputStream = (InputStream) invocation.getArguments()[1];
+                byte[] fileContents = new byte[json.length()];
+                inputStream.read(fileContents);
+                assertThat(new String(fileContents), is(equalTo(json)));
+                return new GKCard.Response(226, "");
+            }
+        });
+        when(card.finalize("/device/settings")).thenReturn(new GKCard.Response(213, ""));
+
+        GKCardSettings.CardResult result = settings.updateCardSettings(config);
+
+        assertThat(result.getStatus(), is(GKCardSettings.Status.SUCCESS));
+        verify(card).put(eq("/device/settings"), any(InputStream.class));
+        verify(card).finalize("/device/settings");
+    }
+
+    @Test
+    public void updateCardSettingsReturnsErrorResponseIfPutFails() throws IOException {
+        GKCardConfiguration config = mock(GKCardConfiguration.class);
+        when(config.getConfigJson()).thenReturn("");
+        when(card.put(eq("/device/settings"), any(InputStream.class))).thenReturn(new GKCard.Response(500, ""));
+
+        GKCardSettings.CardResult result = settings.updateCardSettings(config);
+
+        assertThat(result.getStatus(), is(GKCardSettings.Status.UNKNOWN_STATUS));
+        verify(card).put(eq("/device/settings"), any(InputStream.class));
+        verify(card, never()).finalize("/device/settings");
     }
 }

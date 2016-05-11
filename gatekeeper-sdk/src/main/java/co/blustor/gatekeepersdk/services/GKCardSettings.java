@@ -1,16 +1,8 @@
 package co.blustor.gatekeepersdk.services;
 
-import android.util.Log;
-
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
-
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +16,7 @@ import co.blustor.gatekeepersdk.devices.GKCard.Response;
 public class GKCardSettings {
     private static final String UPDATE_FIRMWARE_PATH = "/device/firmware";
     private static final String GET_FIRMWARE_INFO_PATH = "/device/firmware";
-    private static final String GET_CARD_SETTINGS_PATH = "/device/settings";
+    private static final String CARD_SETTINGS_PATH = "/device/settings";
 
     private final GKCard mCard;
 
@@ -75,8 +67,25 @@ public class GKCardSettings {
      * @since 0.17.0
      */
     public CardSettingsResult getCardSettings() throws IOException {
-        Response response = mCard.get(GET_CARD_SETTINGS_PATH);
+        Response response = mCard.get(CARD_SETTINGS_PATH);
         return new CardSettingsResult(response);
+    }
+
+    /**
+     * Updates card settings file
+     *
+     * @param cardConfiguration the {@code GKCardConfiguration} that is returned from getCardSettings, which can be updated
+     * @return the {@code CardSettingsResult} which holds the card settings
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.17.0
+     */
+    public CardResult updateCardSettings(GKCardConfiguration cardConfiguration) throws IOException {
+        byte[] configBytes = cardConfiguration.getConfigJson().getBytes();
+        Response response = mCard.put(CARD_SETTINGS_PATH, new ByteArrayInputStream(configBytes));
+        if (response.getStatus() != 226) {
+            return new CardResult(response);
+        }
+        return new CardResult(mCard.finalize(CARD_SETTINGS_PATH));
     }
 
     public enum Status {
