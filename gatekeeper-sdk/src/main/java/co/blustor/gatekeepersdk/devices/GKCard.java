@@ -1,8 +1,12 @@
 package co.blustor.gatekeepersdk.devices;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+
+import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
  * GKCard represents a client connection to a GateKeeper Card.
@@ -31,7 +35,7 @@ public interface GKCard {
     /**
      * Send a `get` action to the GateKeeper Card.
      *
-     * @param cardPath the path used in the action
+     * @param cardPath  the path used in the action
      * @param localFile the local file used to store the response data
      * @return a {@code Response} with information about the action
      * @throws IOException when communication with the GateKeeper Card has been disrupted.
@@ -325,6 +329,23 @@ public interface GKCard {
          */
         public void setDataFile(File dataFile) {
             mDataFile = dataFile;
+        }
+
+        /**
+         * Read the data file to a String. DO NOT use for large amounts of data.
+         *
+         * @return the String contents of the file, or an empty String if the file is not present or cannot be read
+         * @since 0.17.0
+         */
+        public String readDataFile() {
+            try {
+                if (mDataFile != null) {
+                    return GKFileUtils.readFile(mDataFile);
+                }
+            } catch (IOException e) {
+                Log.e(Response.class.getCanonicalName(), "Error reading data file", e);
+            }
+            return "";
         }
     }
 
