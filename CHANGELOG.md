@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.17.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.17.0)
+* Renames main library package from `app` to `gatekeeper-sdk` to be consistent with naming practices
+* Add `./bin/installLocal.sh` and `./bin/publishRelease.sh` to handle publishing package to local and remote maven repositories
+* Update release and development instructions in the README
+
 ## [v0.16.3](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.16.3)
 * Write downloaded files to temp files, then copy to the final location
     * This prevents partially downloaded files from appearing in the device Downloads directory
