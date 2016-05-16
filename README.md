@@ -1,5 +1,38 @@
 # GateKeeper SDK
 
+## Development
+
+The GateKeeperSDK is distributed via [maven repositories](https://maven.apache.org/guides/introduction/introduction-to-repositories.html).
+Releases are published to [Bintray](https://bintray.com/) and distributed through the [jcenter](https://bintray.com/bintray/jcenter)
+repo for wide use. To develop locally, the GateKeeperSDK should be installed to your local maven repository.
+To do this:
+
+* Change the `artifact_version_name` in `gradle.properties` to not conflict with a published SDK version, ex:
+
+```
+artifact_version_name=my-test-version
+```
+
+* Run `./bin/installLocal.sh` from the project root
+* In the project which depends on GateKeeperSDK, add `mavenLocal()` to the `repositories` section in `build.gradle`, ex:
+
+```
+allprojects {
+    repositories {
+        jcenter()
+        mavenLocal()
+    }
+}
+```
+
+* Update your project's `build.gradle` to point to the locally installed version of the SDK, ex:
+
+```
+dependencies {
+    compile 'co.blustor:gatekeeper-sdk:my-test-version'
+}
+```
+
 ## Releases
 
 To release a build, perform the following steps:
@@ -7,33 +40,28 @@ To release a build, perform the following steps:
 ### Document Changes
 
 1. Satisfy any pull requests.
-2. Switch to the "staging" branch.
-3. Ensure that the branch is up-to-date with the "master" branch.
-4. Update `build.gradle` file with the next appropriate Version and Build
-   Numbers.
-5. Update the Changelog (`CHANGELOG.md`) with relevant notes (as needed).
-6. Commit Changelog changes with `Release Version <x.x.x>` as the commit
+1. Switch to the "staging" branch.
+1. Ensure that the branch is up-to-date with the "master" branch.
+1. Update `gradle.properties` file with the next appropriate `artifact_version_name` and `artifact_version_code`numbers.
+1. Update the Changelog (`CHANGELOG.md`) with relevant notes (as needed).
+1. Commit Changelog changes with `Release Version <x.x.x>` as the commit
    message.
-7. Merge this branch with master.
+1. Merge this branch with master.
 
 ### Build the SDK
 
-1. Run `bin/build.sh` from the project root path.
-2. Locate the `gatekeepersdk-<x.x.x>.aar` file in the `builds` path.
-3. Archive the `.aar` file with a `.zip` file of the same name (e.g.
-   `gatekeepersdk-1.12.9.aar.zip`).
-4. Locate the `gatekeepersdk-<x.x.x>` folder in the `builds` path.
-5. Archive this folder with a `.zip` file of the same name, plus `.docs` before
-   the extension(e.g. `gatekeepersdk-1.12.9.docs.zip`).
+1. Make sure you are on the "master" branch and you have all the changes you wish to release
+1. Set the `bintray_user` and `bintray_api_key` to the correct [Bintray](https://bintray.com/) user name and API key in `local.properties`
+1. Run `bin/publishRelease.sh` from the project root path.
+1. Done. The version specified in `gradle.properties` will now be available to install from the jcenter repository.
 
 ### Creating a Release on Github
 
 1. Draft a new release with `v<x.x.x>` (e.g. `v1.12.9`) as the "Tag Version" and
    "Release Title."
-2. Set the "Target" to the merge commit for this release on master.
-3. Add any Changelog notes for this release to the Release Description.
-4. Attach the `.aar` and `.docs` archives as binaries.
-5. Publish.
+1. Set the "Target" to the merge commit for this release on master.
+1. Add any Changelog notes for this release to the Release Description.
+1. Publish.
 
 ### Versioning
 
