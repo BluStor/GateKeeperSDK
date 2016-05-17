@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.18.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.18.0)
+* Add `GKCardSettings.getCardSettings` and `GKCardSettings.updateCardSettings` which act on `GKCardConfiguration` objects
+* Add `GKCard.Response.readDataFile` to read small data files to strings
+
 ## [v0.17.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.17.0)
 * Renames main library package from `app` to `gatekeeper-sdk` to be consistent with naming practices
 * Add `./bin/installLocal.sh` and `./bin/publishRelease.sh` to handle publishing package to local and remote maven repositories

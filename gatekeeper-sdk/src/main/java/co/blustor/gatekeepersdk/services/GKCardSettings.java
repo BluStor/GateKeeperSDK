@@ -1,15 +1,14 @@
 package co.blustor.gatekeepersdk.services;
 
-import android.util.Log;
-
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import co.blustor.gatekeepersdk.data.GKCardConfiguration;
 import co.blustor.gatekeepersdk.devices.GKCard;
 import co.blustor.gatekeepersdk.devices.GKCard.Response;
-import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
  * GKCardSettings is a Service for handling GateKeeper Card configuration data.
@@ -17,6 +16,7 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
 public class GKCardSettings {
     private static final String UPDATE_FIRMWARE_PATH = "/device/firmware";
     private static final String GET_FIRMWARE_INFO_PATH = "/device/firmware";
+    private static final String CARD_SETTINGS_PATH = "/device/settings";
 
     private final GKCard mCard;
 
@@ -59,6 +59,35 @@ public class GKCardSettings {
         return new FirmwareInformationResult(response);
     }
 
+    /**
+     * Retrieves card settings file
+     *
+     * @return the {@code CardSettingsResult} which holds the card settings
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.17.0
+     */
+    public CardSettingsResult getCardSettings() throws IOException {
+        Response response = mCard.get(CARD_SETTINGS_PATH);
+        return new CardSettingsResult(response);
+    }
+
+    /**
+     * Updates card settings file
+     *
+     * @param cardConfiguration the {@code GKCardConfiguration} that is returned from getCardSettings, which can be updated
+     * @return the {@code CardSettingsResult} which holds the card settings
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.17.0
+     */
+    public CardResult updateCardSettings(GKCardConfiguration cardConfiguration) throws IOException {
+        byte[] configBytes = cardConfiguration.getConfigJson().getBytes();
+        Response response = mCard.put(CARD_SETTINGS_PATH, new ByteArrayInputStream(configBytes));
+        if (response.getStatus() != 226) {
+            return new CardResult(response);
+        }
+        return new CardResult(mCard.finalize(CARD_SETTINGS_PATH));
+    }
+
     public enum Status {
         /**
          * The action was successful.
@@ -74,6 +103,11 @@ public class GKCardSettings {
          * The given data was not acceptable.
          */
         INVALID_DATA,
+
+        /**
+         * The file could not be found on the card
+         */
+        NOT_FOUND,
 
         /**
          * The GateKeeper Card API returned a result that GKCardSettings does
@@ -128,6 +162,8 @@ public class GKCardSettings {
                     return Status.INVALID_DATA;
                 case 530:
                     return Status.UNAUTHORIZED;
+                case 550:
+                    return Status.NOT_FOUND;
                 default:
                     return Status.UNKNOWN_STATUS;
             }
@@ -143,7 +179,7 @@ public class GKCardSettings {
         private String mFirmwareVersion;
 
         /**
-         * Create an {@code CardResult} to interpret the {@code Response}
+         * Create an {@code FirmwareInformationResult} to interpret the {@code Response}
          * received from the GateKeeper Card.
          *
          * @param response the {@code Response} received from the GateKeeper Card
@@ -179,19 +215,30 @@ public class GKCardSettings {
         }
 
         private String parseVersion(String versionPattern) {
-            if (mResponse.getDataFile() == null) {
-                return null;
-            }
+            String data = mResponse.readDataFile();
+            Pattern pattern = Pattern.compile(versionPattern);
+            Matcher matcher = pattern.matcher(data);
+            return matcher.find() ? matcher.group(1) : null;
+        }
+    }
 
-            try {
-                String data = GKFileUtils.readFile(mResponse.getDataFile());
-                Pattern pattern = Pattern.compile(versionPattern);
-                Matcher matcher = pattern.matcher(data);
-                return matcher.find() ? matcher.group(1) : null;
-            } catch (IOException e) {
-                Log.e(TAG, "Error reading response data", e);
-                return null;
-            }
+    public static class CardSettingsResult extends CardResult {
+        private GKCardConfiguration mCardConfig;
+
+        /**
+         * Create an {@code CardSettingsResult} to interpret the {@code Response}
+         * received from the GateKeeper Card.
+         *
+         * @param response the {@code Response} received from the GateKeeper Card
+         * @since 0.17.0
+         */
+        public CardSettingsResult(Response response) {
+            super(response);
+            mCardConfig = new GKCardConfiguration(response.readDataFile());
+        }
+
+        public GKCardConfiguration getCardConfig() {
+            return mCardConfig;
         }
     }
 }

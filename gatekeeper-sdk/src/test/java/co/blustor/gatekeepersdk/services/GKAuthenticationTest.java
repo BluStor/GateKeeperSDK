@@ -97,11 +97,9 @@ public class GKAuthenticationTest {
     @Test
     public void listFaceTemplatesResultReturnsAllTemplates() throws IOException {
         GKCard.Response fakeResponse = mock(GKCard.Response.class);
-        File dataFile = TestFileUtil.buildTempFile();
         String data = "-rw-rw-rw-   1 root  root       4026 Dec 16  2015 template-name\r\n" +
                 "-rw-rw-rw-   1 root  root       4026 Dec 16  2015 other-template-name\n";
-        TestFileUtil.writeToFile(dataFile, data);
-        when(fakeResponse.getDataFile()).thenReturn(dataFile);
+        when(fakeResponse.readDataFile()).thenReturn(data);
         when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
         GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listFaceTemplates();
         assertThat(listTemplatesResult.getTemplates(), hasItem(equalTo("template-name")));
@@ -111,7 +109,7 @@ public class GKAuthenticationTest {
     @Test
     public void returnsEmptyListWhenDataFileIsNull() throws IOException {
         GKCard.Response fakeResponse = mock(GKCard.Response.class);
-        when(fakeResponse.getDataFile()).thenReturn(null);
+        when(fakeResponse.readDataFile()).thenReturn("");
         when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
         GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listFaceTemplates();
         assertThat(listTemplatesResult.getTemplates(), is(empty()));
@@ -120,8 +118,7 @@ public class GKAuthenticationTest {
     @Test
     public void returnsEmptyListWhenDataFileIsEmpty() throws IOException {
         GKCard.Response fakeResponse = mock(GKCard.Response.class);
-        File dataFile = TestFileUtil.buildTempFile();
-        when(fakeResponse.getDataFile()).thenReturn(dataFile);
+        when(fakeResponse.readDataFile()).thenReturn("");
         when(fakeCard.list(GKAuthentication.LIST_FACE_PATH)).thenReturn(fakeResponse);
         GKAuthentication.ListTemplatesResult listTemplatesResult = new GKAuthentication(fakeCard).listFaceTemplates();
         assertThat(listTemplatesResult.getTemplates(), is(empty()));
