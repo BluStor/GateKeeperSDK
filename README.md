@@ -5,7 +5,7 @@
 * Add the following dependency to your `build.gradle`:
 
 ```
-compile 'co.blustor:gatekeeper-sdk:0.18.0'
+compile 'co.blustor:gatekeeper-sdk:0.18.1'
 ```
 
 * Copy the contents of `gatekeeper-sdk/proguard-rules.pro.example` to your `proguard-rules.pro`
