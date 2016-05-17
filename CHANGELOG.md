@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.18.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.18.1)
+* Include `proguard-rules.pro.example` and SDK install instructions
+
 ## [v0.18.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.18.0)
 * Add `GKCardSettings.getCardSettings` and `GKCardSettings.updateCardSettings` which act on `GKCardConfiguration` objects
 * Add `GKCard.Response.readDataFile` to read small data files to strings

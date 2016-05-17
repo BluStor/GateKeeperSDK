@@ -1,5 +1,15 @@
 # GateKeeper SDK
 
+## Using GateKeeperSDK
+
+* Add the following dependency to your `build.gradle`:
+
+```
+compile 'co.blustor:gatekeeper-sdk:0.18.1'
+```
+
+* Copy the contents of `gatekeeper-sdk/proguard-rules.pro.example` to your `proguard-rules.pro`
+
 ## Development
 
 The GateKeeperSDK is distributed via [maven repositories](https://maven.apache.org/guides/introduction/introduction-to-repositories.html).
@@ -43,6 +53,7 @@ To release a build, perform the following steps:
 1. Switch to the "staging" branch.
 1. Ensure that the branch is up-to-date with the "master" branch.
 1. Update `gradle.properties` file with the next appropriate `artifact_version_name` and `artifact_version_code`numbers.
+1. Update the [usage instructions above](#using-gatekeepersdk) with the latest version
 1. Update the Changelog (`CHANGELOG.md`) with relevant notes (as needed).
 1. Commit Changelog changes with `Release Version <x.x.x>` as the commit
    message.

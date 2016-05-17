@@ -1,0 +1,22 @@
+##------------------- Begin GateKeeperSDK proguard config ----------------
+
+# keep all native code classes
+-keep class java.awt.** { *; }
+-keep class com.sun.jna.** { *; }
+-keep class com.neurotec.** { *; }
+-keep class android.support.** { *; }
+# Gson specific classes
+-keep class sun.misc.Unsafe { *; }
+-keep interface com.sun.jna.** { *; }
+-keep interface com.neurotec.** { *; }
+-keep interface android.support.** { *; }
+
+# Gson uses generic type information stored in a class file when working with fields. Proguard
+# removes such information by default, so configure it to keep all of it.
+-keepattributes Signature
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+-dontwarn java.awt.**
+##------------------- End GateKeeperSDK proguard config ------------------
