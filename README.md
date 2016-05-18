@@ -9,6 +9,7 @@ compile 'co.blustor:gatekeeper-sdk:0.18.1'
 ```
 
 * Copy the contents of `gatekeeper-sdk/proguard-rules.pro.example` to your `proguard-rules.pro`
+* Android Support Repository must be installed, to use the maven features.  Importing the project into Android Studio, the build should fail, and give you the option to install "Android Support Repository".  Here is additional information on installing before importing the SDK project: https://developer.android.com/topic/libraries/support-library/setup.html
 
 ## Development
 
@@ -24,6 +25,11 @@ artifact_version_name=my-test-version
 ```
 
 * Run `./bin/installLocal.sh` from the project root
+```
+# You must be in the GateKeeperSDK directory or you may not find `gradlew`
+cd GateKeeperSDK
+./bin/installLocal.sh
+```
 * In the project which depends on GateKeeperSDK, add `mavenLocal()` to the `repositories` section in `build.gradle`, ex:
 
 ```
