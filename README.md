@@ -9,7 +9,13 @@ compile 'co.blustor:gatekeeper-sdk:0.18.1'
 ```
 
 * Copy the contents of `gatekeeper-sdk/proguard-rules.pro.example` to your `proguard-rules.pro`
-* Android Support Repository must be installed, to use the maven features.  Importing the project into Android Studio, the build should fail, and give you the option to install "Android Support Repository".  Here is additional information on installing before importing the SDK project: https://developer.android.com/topic/libraries/support-library/setup.html
+* Android Support Repository must be installed to use the maven features. Importing the project into Android Studio, the build should fail, and give you the option to install "Android Support Repository". For more information, refer to [the Android docs](https://developer.android.com/topic/libraries/support-library/setup.html)
+* If developing an application targeting Android Marshmallow (v6.0 / API level 23) or later, you will need to [request some permissions at runtime](https://developer.android.com/training/permissions/requesting.html):
+    * `android.permission.CAMERA`
+    * `android.permission.READ_PHONE_STATE`
+    * `android.permission.RECORD_AUDIO`
+    * `android.permission.WRITE_EXTERNAL_STORAGE`
+    * `android.permission.WRITE_SETTINGS`
 
 ## Development
 
