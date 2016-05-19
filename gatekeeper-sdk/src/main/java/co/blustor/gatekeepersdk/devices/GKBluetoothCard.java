@@ -37,6 +37,8 @@ public class GKBluetoothCard implements GKCard {
     private static final String MKD = "MKD";
     private static final String RMD = "RMD";
     private static final String SRFT = "SRFT";
+    private static final String RNFR = "RNFR";
+    private static final String RNTO = "RNTO";
 
     private final String mCardName;
     private File mDataCacheDir;
@@ -100,6 +102,16 @@ public class GKBluetoothCard implements GKCard {
             disconnect();
             throw e;
         }
+    }
+
+    @Override
+    public Response rename(String fromCardPath, String toCardPath) throws IOException {
+        Response fromResponse = call(RNFR, fromCardPath);
+        if (fromResponse.getStatus() != 350) {
+            onConnectionChanged(ConnectionState.CONNECTED);
+            return fromResponse;
+        }
+        return call(RNTO, toCardPath);
     }
 
     @Override
