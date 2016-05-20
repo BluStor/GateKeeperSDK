@@ -16,7 +16,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.junit.MatcherAssert.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class GKFileActionsTest {
@@ -101,8 +103,6 @@ public class GKFileActionsTest {
 
     @Test
     public void putFileReturnsGKFileRepresentingTheCreatedFile() throws IOException {
-        GKCard card = mock(GKCard.class);
-        GKFileActions fileActions = new GKFileActions(card);
         String cardPath = "/card/path/test.txt";
         InputStream inputStream = mock(InputStream.class);
 
@@ -115,5 +115,34 @@ public class GKFileActionsTest {
         GKFileActions.PutFileResult result = fileActions.putFile(inputStream, cardPath);
 
         assertThat(result.getFile().getCardPath(), is(equalTo(cardPath)));
+    }
+
+    @Test
+    public void renameFileRenamesTheFileRelativeToItsCurrentCardPath() throws IOException {
+        String fileLocation = "/test/ing/";
+        String originalName = "this.gif";
+        GKFile file = new GKFile(originalName, GKFile.Type.FILE);
+        file.setCardPath(fileLocation + originalName);
+
+        when(card.rename(anyString(), anyString())).thenReturn(new GKCard.Response(250, ""));
+
+        String newName = "that.gif";
+        GKFileActions.FileResult result = fileActions.renameFile(file, newName);
+
+        assertThat(result.getStatus(), is(equalTo(GKFileActions.Status.SUCCESS)));
+        verify(card).rename(fileLocation + originalName, fileLocation + newName);
+    }
+
+    @Test
+    public void renameFileReturnsErrorIfThereIsAnError() throws IOException {
+        String originalName = "this.gif";
+        GKFile file = new GKFile(originalName, GKFile.Type.FILE);
+        file.setCardPath("/test/ing/" + originalName);
+
+        when(card.rename(anyString(), anyString())).thenReturn(new GKCard.Response(550, ""));
+
+        GKFileActions.FileResult result = fileActions.renameFile(file, "that.gif");
+
+        assertThat(result.getStatus(), is(equalTo(GKFileActions.Status.NOT_FOUND)));
     }
 }

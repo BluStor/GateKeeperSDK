@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.19.0](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.19.0)
+* Add GKFileActions.renameFile
+* Add GKFile.getParentCardPath to return the parent directory
+
 ## [v0.18.1](https://github.com/BluStor/GateKeeperSDK/releases/tag/v0.18.1)
 * Include `proguard-rules.pro.example` and SDK install instructions
 

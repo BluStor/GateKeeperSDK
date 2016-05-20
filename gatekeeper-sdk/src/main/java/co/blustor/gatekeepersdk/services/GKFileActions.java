@@ -76,6 +76,20 @@ public class GKFileActions {
     }
 
     /**
+     * Rename the file located at fromCardPath to the name specified by toCardPath
+     *
+     * @param file the {@code GKFile} to be renamed
+     * @param name the new name of the file, relative to the file's current card path
+     * @return the {@code FileResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.19.0
+     */
+    public FileResult renameFile(GKFile file, String name) throws IOException {
+        String newName = GKFileUtils.joinPath(file.getParentCardPath(), name);
+        return new FileResult(mCard.rename(file.getCardPath(), newName));
+    }
+
+    /**
      * Delete the given file on the GateKeeper Card.
      *
      * @param file a {@code GKFile} referencing the file to delete
@@ -124,6 +138,11 @@ public class GKFileActions {
          * The target path of the action could not be found.
          */
         NOT_FOUND,
+
+        /**
+         * The filename used to attempt a rename already exists
+         */
+        FILE_ALREADY_EXISTS,
 
         /**
          * The GateKeeper Card API returned a result that GKCardSettings does
