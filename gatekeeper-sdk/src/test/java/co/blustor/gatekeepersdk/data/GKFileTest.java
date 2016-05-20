@@ -55,4 +55,21 @@ public class GKFileTest {
         GKFile file = new GKFile("directory.zip", GKFile.Type.DIRECTORY);
         assertThat(file.getFilenameBase(), is(nullValue()));
     }
+
+    @Test
+    public void getParentCardPathReturnsTheParentDirectoryIfPresent() {
+        List<String[]> data = Arrays.asList(new String[][]{
+                {"/test/ing/testing.zip", "/test/ing"},
+                {"/top/testing.docs.tar", "/top"},
+                {"/this/thing/here/testing_this.aar", "/this/thing/here"},
+                {"/no-parent.gif", null},
+                {null, null}
+        });
+
+        for (String[] values : data) {
+            GKFile file = new GKFile(null, GKFile.Type.FILE);
+            file.setCardPath(values[0]);
+            assertThat(file.getParentCardPath(), is(equalTo(values[1])));
+        }
+    }
 }
