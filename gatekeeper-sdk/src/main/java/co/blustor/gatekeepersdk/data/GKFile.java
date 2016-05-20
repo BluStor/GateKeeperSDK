@@ -1,5 +1,7 @@
 package co.blustor.gatekeepersdk.data;
 
+import java.util.ArrayList;
+
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 /**
@@ -164,6 +166,27 @@ public class GKFile {
      */
     public void setCardPath(String parentPath, String fileName) {
         setCardPath(GKFileUtils.joinPath(parentPath, fileName));
+    }
+
+    /**
+     * Retrieve the parent directory
+     *
+     * @return the parent directory if present, null otherwise
+     * @since 0.19.0
+     */
+    public String getParentCardPath() {
+        if (getCardPath() == null) {
+            return null;
+        }
+
+        ArrayList<String> parts = GKFileUtils.parsePath(getCardPath());
+        if (parts.size() <= 1) {
+            return null;
+        }
+
+        int newSize = parts.size() - 1;
+        String[] parentParts = parts.subList(0, newSize).toArray(new String[newSize]);
+        return "/" + GKFileUtils.joinPath(parentParts);
     }
 
     /**

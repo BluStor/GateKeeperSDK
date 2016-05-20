@@ -55,6 +55,17 @@ public interface GKCard {
     Response put(String cardPath, InputStream inputStream) throws IOException;
 
     /**
+     * Send a `rename` action to the GateKeeper Card.
+     *
+     * @param fromCardPath the name to change from
+     * @param toCardPath the name to change to
+     * @return a {@code Response} with information about the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.19.0
+     */
+    Response rename(String fromCardPath, String toCardPath) throws IOException;
+
+    /**
      * Send a `delete` action to the GateKeeper Card.
      *
      * @param cardPath the path used in the action
