@@ -18,6 +18,8 @@ import co.blustor.gatekeepersdk.data.GKFile;
  * involving generic file attributes.
  */
 public class GKFileUtils {
+
+    public static final String DEBUG_PREFIX = "GK-";
     /**
      * Base path of the card
      */

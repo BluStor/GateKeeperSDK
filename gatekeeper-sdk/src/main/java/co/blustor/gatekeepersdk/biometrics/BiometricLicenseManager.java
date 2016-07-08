@@ -1,6 +1,7 @@
 package co.blustor.gatekeepersdk.biometrics;
 
 import com.neurotec.licensing.NLicense;
+import co.blustor.gatekeepersdk.utils.GKFileUtils;
 
 import java.io.IOException;
 
@@ -8,6 +9,9 @@ import java.io.IOException;
  * Intended for internal use only.
  */
 public class BiometricLicenseManager {
+
+    private static final String TAG = GKFileUtils.DEBUG_PREFIX + BiometricLicenseManager.class.getSimpleName();
+
     private String mHost;
     private int mPort;
 
