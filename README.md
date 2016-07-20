@@ -61,30 +61,54 @@ To release a build, perform the following steps:
 
 ### Document Changes
 
-1. Satisfy any pull requests.
-1. Switch to the "staging" branch.
-1. Ensure that the branch is up-to-date with the "master" branch.
-1. Update `gradle.properties` file with the next appropriate `artifact_version_name` and `artifact_version_code`numbers.
-1. Update the [usage instructions above](#using-gatekeepersdk) with the latest version
-1. Update the Changelog (`CHANGELOG.md`) with relevant notes (as needed).
-1. Commit Changelog changes with `Release Version <x.x.x>` as the commit
+* Satisfy any pull requests.
+* Switch to the "staging" branch.
+* Ensure that the branch is up-to-date with the "master" branch.
+* Update `gradle.properties` file with the next appropriate `artifact_version_name` and `artifact_version_code`numbers.
+```
+cd /<your path>/GateKeeperSDK
+vi gradle.properties
+  
+  # Example values:
+  artifact_version_name=0.20.0
+  artifact_version_code=34
+```
+* Update the [usage instructions above](#using-gatekeepersdk) with the latest version
+* Update the Changelog (`CHANGELOG.md`) with relevant notes (as needed).
+* Commit Changelog changes with `Release Version <x.x.x>` as the commit
    message.
-1. Merge this branch with master.
+* Merge this branch with master.
 
 ### Build the SDK
 
-1. Make sure you are on the "master" branch and you have all the changes you wish to release
-1. Set the `bintray_user` and `bintray_api_key` to the correct [Bintray](https://bintray.com/) user name and API key in `local.properties`
-1. Run `bin/publishRelease.sh` from the project root path.
-1. Done. The version specified in `gradle.properties` will now be available to install from the jcenter repository.
+* Make sure you are on the "master" branch and you have all the changes you wish to release
+* Set the `bintray_user` and `bintray_api_key` to the correct [Bintray](https://bintray.com/) user name and API key in `local.properties`
+```
+// To get your API Key, open the website and login: https://bintray.com/blufrog.
+// Click "Edit" profile.  Left side navigate to "API Key".
+// Enter your bintray password
+// Copy the key to your clipboard and then add to local.properties.
+// See next step for location of property file
+
+// Note: This file is managed by Android Studio and all changes will be lost
+// You have to set these properties each time you build
+  
+  cd /<your path>/GateKeeperSDK
+  vi local.properties
+
+   bintray_user=blufrog
+   bintray_api_key=<key not shown>
+```
+* Run `bin/publishRelease.sh` from the project root path.
+* Done. The version specified in `gradle.properties` will now be available to install from the jcenter repository.
 
 ### Creating a Release on Github
 
-1. Draft a new release with `v<x.x.x>` (e.g. `v1.12.9`) as the "Tag Version" and
+* Draft a new release with `v<x.x.x>` (e.g. `v1.12.9`) as the "Tag Version" and
    "Release Title."
-1. Set the "Target" to the merge commit for this release on master.
-1. Add any Changelog notes for this release to the Release Description.
-1. Publish.
+* Set the "Target" to the merge commit for this release on master.
+* Add any Changelog notes for this release to the Release Description.
+* Publish.
 
 ### Versioning
 
