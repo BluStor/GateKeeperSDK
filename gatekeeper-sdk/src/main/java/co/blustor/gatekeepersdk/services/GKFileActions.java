@@ -17,7 +17,7 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  * GKFileActions is a Service for handling file data with the GateKeeper Card.
  */
 public class GKFileActions {
-    public static final String TAG = GKFileActions.class.getSimpleName();
+    public static final String TAG = GKFileActions.class.getCanonicalName();
     private final GKCard mCard;
 
     /**

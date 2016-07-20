@@ -19,7 +19,6 @@ import co.blustor.gatekeepersdk.data.GKFile;
  */
 public class GKFileUtils {
 
-    public static final String DEBUG_PREFIX = "GK-";
     /**
      * Base path of the card
      */

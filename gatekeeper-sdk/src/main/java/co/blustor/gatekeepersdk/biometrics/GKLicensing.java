@@ -16,7 +16,7 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  * GKLicensing is responsible for obtaining the licenses necessary for GateKeeper biometrics.
  */
 public class GKLicensing {
-    public static final String TAG = GKConst.DEBUG_PREFIX + GKLicensing.class.getSimpleName();
+    public static final String TAG = GKLicensing.class.getCanonicalName();
 
     /**
      * The {@code String} license IDs needed by GateKeeper biometrics.
@@ -71,7 +71,7 @@ public class GKLicensing {
     }
 
     private String getLicense() throws IOException {
-        Log.d(TAG, "getLicense()");
+        Log.d(TAG, "getLicense(): mLicenseSubDir = " + mLicenseSubDir);
         String licenseSubDir = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, mLicenseSubDir);
         GKFile existingLicenseFile = getFirstFile(licenseSubDir, LicenseFileExtensions.LICENSE);
         if (existingLicenseFile != null) {
@@ -89,28 +89,32 @@ public class GKLicensing {
     }
 
     private GKLicenseValidationResult validateLicense(String license) throws IOException {
-        Log.d(TAG, "validateLicense()");
+        Log.d(TAG, "validateLicense(): license = " + license);
 
         mLicenseManager.add(license);
 
         for (String component : LICENSES) {
+            Log.d(TAG, "validateLicense(): component = " + component);
             if (!mLicenseManager.obtainComponents(component)) {
                 return GKLicenseValidationResult.VALIDATION_FAILURE;
             }
         }
-
         return GKLicenseValidationResult.SUCCESS;
     }
 
     private GKFile getFirstFile(String dir, String extension) throws IOException {
-        Log.d(TAG, "getFirstFile() Get the first license file in the list");
+        Log.d(TAG, "getFirstFile(): Get the first license file in the list");
+        Log.d(TAG, "getFirstFile(): dir = " + dir);
+        Log.d(TAG, "getFirstFile(): extension = " + extension);
         GKFileActions.ListFilesResult listFilesResult = mFileActions.listFiles(dir);
 
         for (GKFile file : listFilesResult.getFiles()) {
             if (extension.equals(file.getExtension())) {
+                Log.d(TAG, "getFirstFile(): return file match = " + file.getName());
                 return file;
             }
         }
+        Log.d(TAG, "getFirstFile(): No matching file, return null");
         return null;
     }
 

@@ -49,6 +49,9 @@ android {
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.aar')) {
                 output.outputFile = new File("./builds/gatekeepersdk-${defaultConfig.versionName}.aar")
+                // Uncomment for nested Android Studio project
+                // Make sure path is correct for GateKeeper project location
+                // output.outputFile = new File("/Users/mbrooks/development/projects/GateKeeper/builds/gatekeepersdk-${defaultConfig.versionName}.aar")
             }
         }
     }

@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class BiometricLicenseManager {
 
-    private static final String TAG = GKFileUtils.DEBUG_PREFIX + BiometricLicenseManager.class.getSimpleName();
+    private static final String TAG = BiometricLicenseManager.class.getCanonicalName();
 
     private String mHost;
     private int mPort;

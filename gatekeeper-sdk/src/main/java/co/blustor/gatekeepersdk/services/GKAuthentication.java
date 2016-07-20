@@ -19,7 +19,7 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  * GKAuthentication is a Service for using facial authentication with the GateKeeper Card.
  */
 public class GKAuthentication {
-    public static final String TAG = GKAuthentication.class.getSimpleName();
+    public static final String TAG = GKAuthentication.class.getCanonicalName();
 
     public static final String ENROLL_FACE_PATH_PREFIX = "/auth/enroll/face/";
     public static final String ENROLL_RECOVERY_CODE_PATH_PREFIX = "/auth/enroll/code/";

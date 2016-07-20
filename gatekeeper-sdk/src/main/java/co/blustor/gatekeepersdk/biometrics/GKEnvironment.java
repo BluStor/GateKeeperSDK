@@ -6,6 +6,7 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.neurotec.lang.NCore;
 import com.neurotec.plugins.NDataFileManager;
@@ -25,7 +26,7 @@ import co.blustor.gatekeepersdk.services.GKFileActions;
  * @since 0.5.0
  */
 public class GKEnvironment {
-    public static final String TAG = GKEnvironment.class.getSimpleName();
+    public static final String TAG = GKEnvironment.class.getCanonicalName();
 
     private static GKEnvironment mInstance;
     private final Context mContext;
@@ -60,9 +61,11 @@ public class GKEnvironment {
      * @since 0.5.0
      */
     public AsyncTask<Void, Void, GKLicenseValidationResult> initialize(final InitializationListener listener) {
+        Log.d(TAG, "initialize()");
         AsyncTask<Void, Void, GKLicenseValidationResult> asyncTask = new AsyncTask<Void, Void, GKLicenseValidationResult>() {
             @Override
             protected GKLicenseValidationResult doInBackground(Void... params) {
+                Log.d(TAG, "doInBackground()");
                 ensureDataFilesExist();
                 NCore.setContext(mContext);
                 return mLicensing.obtainLicenses();
@@ -94,6 +97,7 @@ public class GKEnvironment {
     @NonNull
     private GKLicensing buildLicensing(Context context, GKFileActions fileActions) {
         String macAddress = getMacAddress(context);
+        Log.d(TAG, "buildLicensing(): macAddress = " + macAddress);
         BiometricLicenseManager licenseManager = new BiometricLicenseManager("/local", 5000);
         return new GKLicensing(macAddress, fileActions, licenseManager);
     }
@@ -102,10 +106,13 @@ public class GKEnvironment {
     private String getMacAddress(Context context) {
         WifiManager wifiService = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo connectionInfo = wifiService.getConnectionInfo();
+        Log.d(TAG, "getMacAddress(): connectionInfo = " + connectionInfo);
         return connectionInfo == null ? null : connectionInfo.getMacAddress();
     }
 
     private void ensureDataFilesExist() {
+        Log.d(TAG, "ensureDataFilesExist()");
+        Log.d(TAG, "ensureDataFilesExist(): mContext.getFilesDir() = " + mContext.getFilesDir());
         File facesFile = new File(mContext.getFilesDir(), "Faces.ndf");
         if (!facesFile.exists()) {
             try {
@@ -122,6 +129,7 @@ public class GKEnvironment {
                 e.printStackTrace();
             }
         }
+        Log.d(TAG, "ensureDataFilesExist(): Add file to Data File Manager");
         NDataFileManager.getInstance().addFile(facesFile.getAbsolutePath());
     }
 

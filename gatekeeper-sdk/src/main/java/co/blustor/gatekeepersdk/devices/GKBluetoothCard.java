@@ -26,7 +26,7 @@ import co.blustor.gatekeepersdk.data.GKMultiplexer;
 import co.blustor.gatekeepersdk.utils.GKStringUtils;
 
 public class GKBluetoothCard implements GKCard {
-    public static final String TAG = GKBluetoothCard.class.getSimpleName();
+    public static final String TAG = GKBluetoothCard.class.getCanonicalName();
 
     private static final UUID BLUETOOTH_SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -47,6 +47,7 @@ public class GKBluetoothCard implements GKCard {
 
     private GKCard.ConnectionState mConnectionState = GKCard.ConnectionState.DISCONNECTED;
     private BluetoothSocket mBluetoothSocket;
+    private final GKBluetoothUtil GKBluetoothUtil = new GKBluetoothUtil();
 
     /**
      * Create a {@code GKBluetoothCard} to connect with the GateKeeper Card having the
@@ -63,17 +64,20 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public Response list(String cardPath) throws IOException {
+        Log.d(TAG, "list(): cardPath = " + cardPath);
         cardPath = globularPath(cardPath);
         return get(LIST, cardPath);
     }
 
     @Override
     public Response get(String cardPath) throws IOException {
+        Log.d(TAG, "get(): cardPath = " + cardPath);
         return get(RETR, cardPath);
     }
 
     @Override
     public Response get(String cardPath, File localFile) throws IOException {
+        Log.d(TAG, "get(): cardPath = " + cardPath + ", localFile = " + localFile);
         Response response = get(RETR, cardPath);
         copyResponseDataToLocalFile(response, localFile);
         return response;
@@ -81,6 +85,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public Response put(String cardPath, InputStream inputStream) throws IOException {
+        Log.d(TAG, "put(): cardPath = " + cardPath + ", inputStream");
         try {
             connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
@@ -137,6 +142,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public void connect() throws IOException {
+        Log.d(TAG, "connect()");
         if (isDisconnected()) {
             disconnect();
             onConnectionChanged(ConnectionState.CONNECTING);
@@ -145,6 +151,9 @@ public class GKBluetoothCard implements GKCard {
                 return;
             }
             try {
+
+                GKBluetoothUtil.cycleBluetoothAdaptor();
+
                 mBluetoothSocket = bluetoothDevice.createRfcommSocketToServiceRecord(BLUETOOTH_SPP_UUID);
                 mBluetoothSocket.connect();
                 InputStream inputStream = mBluetoothSocket.getInputStream();
@@ -161,6 +170,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public void disconnect() throws IOException {
+        Log.d(TAG, "disconnect()");
         onConnectionChanged(ConnectionState.DISCONNECTING);
         if (mMultiplexer != null) {
             try {
@@ -177,6 +187,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public ConnectionState getConnectionState() {
+        Log.d(TAG, "getConnectionState()");
         synchronized (mCardMonitors) {
             return mConnectionState;
         }
@@ -184,6 +195,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Override
     public void onConnectionChanged(ConnectionState state) {
+        Log.d(TAG, "onConnectionChanged()");
         synchronized (mCardMonitors) {
             if (mConnectionState.equals(state)) {
                 return;
@@ -221,6 +233,7 @@ public class GKBluetoothCard implements GKCard {
     }
 
     private Response get(String method, String cardPath) throws IOException {
+        Log.d(TAG, "get(): method = " + method + ", cardPath = " + cardPath);
         try {
             File dataFile = createDataFile();
             connect();
@@ -247,10 +260,13 @@ public class GKBluetoothCard implements GKCard {
     }
 
     private void copyResponseDataToLocalFile(Response response, File localFile) throws IOException {
+        Log.d(TAG, "copyResponseDataToLocalFile()");
         File tempDataFile = response.getDataFile();
         FileChannel src = null;
         FileChannel dest = null;
         try {
+            Log.d(TAG, "copyResponseDataToLocalFile(): tempDataFile " + tempDataFile);
+            Log.d(TAG, "copyResponseDataToLocalFile(): localFile " + localFile);
             src = new FileInputStream(tempDataFile).getChannel();
             dest = new FileOutputStream(localFile).getChannel();
             dest.transferFrom(src, 0, src.size());
@@ -266,10 +282,12 @@ public class GKBluetoothCard implements GKCard {
     }
 
     private File createDataFile() throws IOException {
+        Log.d(TAG, "createDataFile()");
         return File.createTempFile("data", "tmp", mDataCacheDir);
     }
 
     private Response call(String method, String cardPath) throws IOException {
+        Log.d(TAG, "call(): method = " + method + ", cardPath = " + cardPath);
         try {
             connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
@@ -288,9 +306,10 @@ public class GKBluetoothCard implements GKCard {
     }
 
     private void sendCommand(String method, String argument) throws IOException {
+        Log.d(TAG, "sendCommand(): method = " + method + ", argument = " + argument);
         checkMultiplexer();
         String cmd = buildCommandString(method, argument);
-        Log.i(TAG, "Sending Command: '" + cmd.trim() + "'");
+        Log.i(TAG, "sendCommand(): Sending Command: '" + cmd.trim() + "'");
         byte[] bytes = getCommandBytes(cmd);
         mMultiplexer.writeToCommandChannel(bytes);
     }
@@ -332,6 +351,7 @@ public class GKBluetoothCard implements GKCard {
 
     @Nullable
     private BluetoothDevice findBluetoothDevice() {
+        Log.d(TAG, "findBluetoothDevice()");
         BluetoothAdapter adapter = getBluetoothAdapter();
         if (!adapter.isEnabled()) {
             onConnectionChanged(ConnectionState.BLUETOOTH_DISABLED);
@@ -339,6 +359,8 @@ public class GKBluetoothCard implements GKCard {
         }
         Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
         for (BluetoothDevice device : pairedDevices) {
+            Log.d(TAG, "findBluetoothDevice(): device.getName() = " + device.getName());
+            Log.d(TAG, "findBluetoothDevice(): device.getAddress() = " + device.getAddress());
             if (device.getName().equals(mCardName)) {
                 return device;
             }
@@ -349,6 +371,7 @@ public class GKBluetoothCard implements GKCard {
 
     @NonNull
     private BluetoothAdapter getBluetoothAdapter() {
+        Log.d(TAG, "getBluetoothAdapter()");
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
             throw new RuntimeException("Bluetooth is not available on this device");

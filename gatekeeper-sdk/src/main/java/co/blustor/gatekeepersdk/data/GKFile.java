@@ -8,7 +8,7 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  * A GKFile represents a file or path on a GateKeeper Card.
  */
 public class GKFile {
-    public static final String TAG = GKFile.class.getSimpleName();
+    public static final String TAG = GKFile.class.getCanonicalName();
     /**
      * The absolute path to the entry on the GateKeeper Card.
      */
