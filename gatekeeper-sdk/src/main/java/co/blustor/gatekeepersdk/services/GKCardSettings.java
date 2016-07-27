@@ -16,6 +16,8 @@ import co.blustor.gatekeepersdk.devices.GKCard.Response;
 public class GKCardSettings {
     private static final String UPDATE_FIRMWARE_PATH = "/device/firmware";
     private static final String GET_FIRMWARE_INFO_PATH = "/device/firmware";
+    private static final String UPDATE_BOOTLOADER_PATH = "/device/bootld";
+    private static final String GET_BOOTLOADER_INFO_PATH = "/device/bootld";
     private static final String CARD_SETTINGS_PATH = "/device/settings";
 
     private final GKCard mCard;
@@ -48,6 +50,23 @@ public class GKCardSettings {
     }
 
     /**
+     * Send Bootloader data to the GateKeeper Card.
+     *
+     * @param inputStream a stream with Bootloader data
+     * @return the {@code CardResult} of the action
+     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @since 0.5.0
+     */
+    public CardResult updateBootloader(InputStream inputStream) throws IOException {
+        Response response = mCard.put(UPDATE_BOOTLOADER_PATH, inputStream);
+        if (response.getStatus() != 226) {
+            return new CardResult(response);
+        }
+        Response finalize = mCard.finalize(UPDATE_BOOTLOADER_PATH);
+        return new CardResult(finalize);
+    }
+
+    /**
      * Retrieves Firmware data from the GateKeeper Card.
      *
      * @return the {@code FirmwareInformationResult} of the action
@@ -58,6 +77,7 @@ public class GKCardSettings {
         Response response = mCard.get(GET_FIRMWARE_INFO_PATH);
         return new FirmwareInformationResult(response);
     }
+
 
     /**
      * Retrieves card settings file
