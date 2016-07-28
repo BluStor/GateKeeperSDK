@@ -48,10 +48,18 @@ android {
         variant.outputs.each { output ->
             def outputFile = output.outputFile
             if (outputFile != null && outputFile.name.endsWith('.aar')) {
-                output.outputFile = new File("./builds/gatekeepersdk-${defaultConfig.versionName}.aar")
-                // Uncomment for nested Android Studio project
-                // Make sure path is correct for GateKeeper project location
-                // output.outputFile = new File("/Users/mbrooks/development/projects/GateKeeper/builds/gatekeepersdk-${defaultConfig.versionName}.aar")
+
+                def script_home = project.buildscript.sourceFile
+
+                println script_home
+
+                // This uses a Global variables defined in gradle.properties.
+                if (new Boolean(is_nested_sdk)) {
+                  output.outputFile = new File(gatekeeper_home + "/builds/gatekeepersdk-${defaultConfig.versionName}.aar")
+                } else {
+                  output.outputFile = new File("./builds/gatekeepersdk-${defaultConfig.versionName}.aar")
+               }
+
             }
         }
     }
