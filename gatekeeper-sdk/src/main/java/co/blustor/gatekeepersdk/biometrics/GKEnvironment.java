@@ -96,8 +96,6 @@ public class GKEnvironment {
 
     @NonNull
     private GKLicensing buildLicensing(Context context, GKFileActions fileActions) {
-
-        //String macAddress = getMacAddress(context);
         String macAddress = android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
         Log.d(TAG, "buildLicensing(): macAddress = " + macAddress);
         BiometricLicenseManager licenseManager = new BiometricLicenseManager("/local", 5000);
@@ -109,12 +107,7 @@ public class GKEnvironment {
         WifiManager wifiService = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo connectionInfo = wifiService.getConnectionInfo();
         Log.d(TAG, "getMacAddress(): connectionInfo = " + connectionInfo);
-
-        String macAddress = android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
-
         return connectionInfo == null ? null : connectionInfo.getMacAddress();
-
-
     }
 
     private void ensureDataFilesExist() {
