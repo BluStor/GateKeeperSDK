@@ -109,7 +109,12 @@ public class GKEnvironment {
         WifiManager wifiService = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo connectionInfo = wifiService.getConnectionInfo();
         Log.d(TAG, "getMacAddress(): connectionInfo = " + connectionInfo);
+
+        String macAddress = android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
+
         return connectionInfo == null ? null : connectionInfo.getMacAddress();
+
+
     }
 
     private void ensureDataFilesExist() {
