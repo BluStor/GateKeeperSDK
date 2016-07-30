@@ -49,6 +49,8 @@ public class GKBluetoothCard implements GKCard {
     private BluetoothSocket mBluetoothSocket;
     private final GKBluetoothUtil GKBluetoothUtil = new GKBluetoothUtil();
 
+    private Boolean isActive = false;
+
     /**
      * Create a {@code GKBluetoothCard} to connect with the GateKeeper Card having the
      * given name.
@@ -86,6 +88,7 @@ public class GKBluetoothCard implements GKCard {
     @Override
     public Response put(String cardPath, InputStream inputStream) throws IOException {
         Log.d(TAG, "put(): cardPath = " + cardPath + ", inputStream");
+        isActive = true;
         try {
             connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
@@ -106,6 +109,8 @@ public class GKBluetoothCard implements GKCard {
         } catch (IOException e) {
             disconnect();
             throw e;
+        } finally {
+            isActive = false;
         }
     }
 
@@ -262,6 +267,11 @@ public class GKBluetoothCard implements GKCard {
     }
 
 
+    @Override
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
 
     private boolean isDisconnected() {
         return mMultiplexer == null || mBluetoothSocket == null || !mBluetoothSocket.isConnected();
@@ -269,6 +279,7 @@ public class GKBluetoothCard implements GKCard {
 
     private Response get(String method, String cardPath) throws IOException {
         Log.d(TAG, "get(): method = " + method + ", cardPath = " + cardPath);
+        isActive = true;
         try {
             File dataFile = createDataFile();
             connect();
@@ -291,6 +302,8 @@ public class GKBluetoothCard implements GKCard {
         } catch (IOException e) {
             disconnect();
             throw e;
+        } finally {
+            isActive = false;
         }
     }
 
@@ -323,6 +336,7 @@ public class GKBluetoothCard implements GKCard {
 
     private Response call(String method, String cardPath) throws IOException {
         Log.d(TAG, "call(): method = " + method + ", cardPath = " + cardPath);
+        isActive = true;
         try {
             connect();
             onConnectionChanged(ConnectionState.TRANSFERRING);
@@ -337,6 +351,8 @@ public class GKBluetoothCard implements GKCard {
         } catch (IOException e) {
             disconnect();
             throw e;
+        } finally {
+            isActive = false;
         }
     }
 
