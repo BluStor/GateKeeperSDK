@@ -23,6 +23,13 @@ public interface GKCard {
     Response list(String cardPath) throws IOException;
 
     /**
+     * Check if communication to card is active.
+     *
+     * @since 0.5.0
+     */
+    Boolean getIsActive();
+
+    /**
      * Send a `get` action to the GateKeeper Card.
      *
      * @param cardPath the path used in the action
