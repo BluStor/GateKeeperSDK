@@ -154,6 +154,14 @@ public interface GKCard {
     void removeMonitor(Monitor monitor);
 
     /**
+     * Find device address for paired CyberGate card
+     *
+     * @return the String contents of the device adddress, or an empty String if no device is paired or cannot be read
+     * @since 0.20.2
+     */
+    String findDeviceAddress();
+
+    /**
      * ConnectionState is the current state of the connection between a {@code GKCard} and
      * a GateKeeper Card.
      */
@@ -216,6 +224,11 @@ public interface GKCard {
          * The numeric status code received at the conclusion of the action.
          */
         protected int mStatus;
+
+        /**
+         * The {@code String} device address of the paired CyberGate card
+         */
+        protected String mDeviceAddress;
 
         /**
          * The {@code String} message received at the conclusion of the action.
@@ -358,6 +371,7 @@ public interface GKCard {
             }
             return "";
         }
+
     }
 
     /**

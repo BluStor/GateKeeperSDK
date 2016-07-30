@@ -229,6 +229,27 @@ public class GKBluetoothCard implements GKCard {
                 mCardMonitors.add(monitor);
             }
         }
+    }    @Override
+         public String findDeviceAddress() {
+
+        Log.d(TAG, "findDeviceAddress()");
+        BluetoothAdapter adapter = getBluetoothAdapter();
+        String address = "";
+
+        if (!adapter.isEnabled()) {
+            return address;
+        }
+
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+        for (BluetoothDevice device : pairedDevices) {
+            Log.d(TAG, "findBluetoothDevice(): device.getName() = " + device.getName());
+            Log.d(TAG, "findBluetoothDevice(): device.getAddress() = " + device.getAddress());
+            if (device.getName().equals(mCardName)) {
+                return device.getAddress();
+            }
+        }
+
+        return address;
     }
 
     @Override
@@ -239,6 +260,8 @@ public class GKBluetoothCard implements GKCard {
             }
         }
     }
+
+
 
     private boolean isDisconnected() {
         return mMultiplexer == null || mBluetoothSocket == null || !mBluetoothSocket.isConnected();
