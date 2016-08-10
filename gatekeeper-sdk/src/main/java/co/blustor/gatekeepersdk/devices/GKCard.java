@@ -169,9 +169,8 @@ public interface GKCard {
     String findDeviceAddress();
 
     /**
-     * Returns current transfer file size.
      *
-     * @throws IOException when communication with the GateKeeper Card has been disrupted.
+     * @return current amount of data transfer from phone to card
      * @since 0.5.0
      */
     long getCurrentDataTransferSize();
