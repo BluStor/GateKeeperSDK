@@ -76,15 +76,23 @@ public class GKEnvironment {
                 super.onPostExecute(result);
                 switch (result) {
                     case SUCCESS:
+                        Log.d(TAG, "SUCCESS");
                         listener.onLicensesObtained();
                         break;
                     case NO_LICENSES_AVAILABLE:
+                        Log.d(TAG, "NO_LICENSES_AVAILABLE");
                         listener.onNoLicensesAvailable();
                         break;
                     case VALIDATION_FAILURE:
+                        Log.d(TAG, "VALIDATION_FAILURE");
                         listener.onLicenseValidationFailure();
                         break;
+                    case COMMUNICATION_ERROR:
+                        Log.d(TAG, "COMMUNICATION_ERROR");
+                        listener.onCommunicationError();
+                        break;
                     case ERROR:
+                        Log.d(TAG, "ERROR");
                         listener.onLicenseValidationError();
                         break;
                 }
@@ -112,16 +120,20 @@ public class GKEnvironment {
 
     private void ensureDataFilesExist() {
         Log.d(TAG, "ensureDataFilesExist()");
-        Log.d(TAG, "ensureDataFilesExist(): mContext.getFilesDir() = " + mContext.getFilesDir());
+        Log.d(TAG, "ensureDataFilesExist(): The absolute path to the directory on the filesystem, mContext.getFilesDir() = " + mContext.getFilesDir());
         File facesFile = new File(mContext.getFilesDir(), "Faces.ndf");
+        Log.d(TAG, "ensureDataFilesExist(): facesFile.getAbsolutePath() = " + facesFile.getAbsolutePath());
         if (!facesFile.exists()) {
+            Log.d(TAG, "ensureDataFilesExist(): facesFile does not exist");
             try {
+                Log.d(TAG, "ensureDataFilesExist(): R.raw.faces = " + R.raw.faces);
                 InputStream is = mContext.getResources().openRawResource(R.raw.faces);
                 int size = is.available();
                 byte[] buffer = new byte[size];
                 is.read(buffer);
                 is.close();
 
+                Log.d(TAG, "ensureDataFilesExist(): Create and write facesFile");
                 FileOutputStream fos = new FileOutputStream(facesFile);
                 fos.write(buffer);
                 fos.close();
@@ -129,7 +141,7 @@ public class GKEnvironment {
                 e.printStackTrace();
             }
         }
-        Log.d(TAG, "ensureDataFilesExist(): Add file to Data File Manager");
+        Log.d(TAG, "ensureDataFilesExist(): Add faces file to Data File Manager");
         NDataFileManager.getInstance().addFile(facesFile.getAbsolutePath());
     }
 
@@ -144,5 +156,6 @@ public class GKEnvironment {
         void onNoLicensesAvailable();
         void onLicenseValidationFailure();
         void onLicenseValidationError();
+        void onCommunicationError();
     }
 }

@@ -272,6 +272,8 @@ public class GKBluetoothCard implements GKCard {
         return isActive;
     }
 
+    @Override
+    public long getCurrentDataTransferSize() { return mMultiplexer.getCurrentDataTransferSize(); }
 
     private boolean isDisconnected() {
         return mMultiplexer == null || mBluetoothSocket == null || !mBluetoothSocket.isConnected();

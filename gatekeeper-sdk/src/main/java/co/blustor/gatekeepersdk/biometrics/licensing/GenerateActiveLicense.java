@@ -1,10 +1,13 @@
 package co.blustor.gatekeepersdk.biometrics.licensing;
 
+import android.util.Log;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 
 import co.blustor.gatekeepersdk.biometrics.BiometricLicenseManager;
+import co.blustor.gatekeepersdk.biometrics.GKLicensing;
 import co.blustor.gatekeepersdk.data.GKFile;
 import co.blustor.gatekeepersdk.services.GKFileActions;
 import co.blustor.gatekeepersdk.utils.GKFileUtils;
@@ -13,22 +16,28 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  * Intended for internal use only.
  */
 public class GenerateActiveLicense {
+
+    public static final String TAG = GenerateActiveLicense.class.getCanonicalName();
+
     private final BiometricLicenseManager mLicenseManager;
     protected GKFileActions mFileActions;
     protected String mLicenseSubDir;
 
     public GenerateActiveLicense(BiometricLicenseManager licenseManager, GKFileActions fileActions, String licenseSubDir) {
+        Log.d(TAG, "GenerateActiveLicense(BiometricLicenseManager licenseManager, GKFileActions fileActions, String licenseSubDir)");
         mLicenseManager = licenseManager;
         mFileActions = fileActions;
         mLicenseSubDir = licenseSubDir;
     }
 
     public String execute(GKFile serialNumberFile) throws IOException {
+        Log.d(TAG, "execute(): serialNumberFile = " + serialNumberFile.getName());
         GKFileActions.GetFileResult fileResult = getSerialNumberFile(serialNumberFile);
         if (fileResult.getStatus() != GKFileActions.Status.SUCCESS) {
             throw new IOException("Could not retrieve serial number file");
         }
 
+        Log.d(TAG, "Read File = " + fileResult.getFile().getAbsolutePath());
         String serialNumber = GKFileUtils.readFile(fileResult.getFile());
 
         GKFileActions.FileResult createLicenseSubdirectoryResult = createLicenseSubdirectory();
@@ -59,16 +68,22 @@ public class GenerateActiveLicense {
     }
 
     private GKFileActions.FileResult createLicenseSubdirectory() throws IOException {
+        Log.d(TAG, "createLicenseSubdirectory()");
+
+        Log.d(TAG, "createLicenseSubdirectory(): Lists files in directory = " + GKFileUtils.LICENSE_ROOT);
         GKFileActions.ListFilesResult licenseDirList = mFileActions.listFiles(GKFileUtils.LICENSE_ROOT);
         for (GKFile file : licenseDirList.getFiles()) {
             if (file.isDirectory() && mLicenseSubDir.equals(file.getName())) {
+                Log.d(TAG, "createLicenseSubdirectory(): Existing directory found, return success");
                 return new GKFileActions.FileResult(GKFileActions.Status.SUCCESS);
             }
         }
+        Log.d(TAG, "createLicenseSubdirectory(): Directory not found, create");
         return mFileActions.makeDirectory(buildPathFromLicenseSubDir());
     }
 
     private void cleanupLicenses(String license, GKFileActions.PutFileResult putLicenseFileResult) throws IOException {
+        Log.d(TAG, "cleanupLicenses()");
         if (license != null) {
             mLicenseManager.deactivateOnline(license);
         }

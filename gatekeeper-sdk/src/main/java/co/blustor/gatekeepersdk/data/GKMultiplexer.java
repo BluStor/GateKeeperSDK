@@ -22,6 +22,8 @@ public class GKMultiplexer {
     private static final byte CARRIAGE_RETURN = 13;
     private static final byte LINE_FEED = 10;
     private static final int UPLOAD_DELAY_MILLIS = 1;
+    
+    private long CURRENT_DATA_TRANSFER_FILE_SIZE=0;
 
     private InputStream mInputStream;
     private OutputStream mOutputStream;
@@ -42,18 +44,27 @@ public class GKMultiplexer {
     public void writeToDataChannel(InputStream inputStream) throws IOException, InterruptedException {
         int bytesRead;
         byte[] buffer = new byte[MAXIMUM_PAYLOAD_SIZE];
-        do {
-            bytesRead = inputStream.read(buffer, 0, buffer.length);
-            if (bytesRead == -1) {
-                continue;
-            }
-            if (bytesRead < buffer.length) {
-                writeToDataChannel(Arrays.copyOf(buffer, bytesRead));
-            } else {
-                writeToDataChannel(buffer);
-            }
-            Thread.sleep(UPLOAD_DELAY_MILLIS);
-        } while (bytesRead != -1);
+        CURRENT_DATA_TRANSFER_FILE_SIZE = 0;
+        int COUNTER=0;
+        try {
+            do {
+                bytesRead = inputStream.read(buffer, 0, buffer.length);
+                if (bytesRead == -1) {
+                    continue;
+                }
+                CURRENT_DATA_TRANSFER_FILE_SIZE+=buffer.length;
+                COUNTER+=1;
+                if (bytesRead < buffer.length) {
+                    writeToDataChannel(Arrays.copyOf(buffer, bytesRead));
+                } else {
+                    writeToDataChannel(buffer);
+                }
+                if (COUNTER%50 == 0) { Log.d(TAG, "CURRENT_DATA_TRANSFER_FILE_SIZE = " + CURRENT_DATA_TRANSFER_FILE_SIZE); }
+                Thread.sleep(UPLOAD_DELAY_MILLIS);
+            } while (bytesRead != -1);
+        } finally {
+            CURRENT_DATA_TRANSFER_FILE_SIZE = 0;
+        }
     }
 
     public byte[] readCommandChannelLine() throws IOException {
@@ -75,8 +86,13 @@ public class GKMultiplexer {
             fileOutputStream = new FileOutputStream(dataFile);
             DataPacket packet = DataPacket.Builder.build(mInputStream);
 
+            CURRENT_DATA_TRANSFER_FILE_SIZE = 0;
+            int COUNTER=0;
             while (DATA_CHANNEL == packet.getChannel()) {
                 byte[] payload = packet.getPayload();
+                COUNTER+=1;
+                CURRENT_DATA_TRANSFER_FILE_SIZE+=payload.length;
+                if (COUNTER%50 == 0) { Log.d(TAG, "CURRENT_DATA_TRANSFER_FILE_SIZE = " + CURRENT_DATA_TRANSFER_FILE_SIZE); }
                 fileOutputStream.write(payload);
                 packet = DataPacket.Builder.build(mInputStream);
             }
@@ -90,6 +106,7 @@ public class GKMultiplexer {
             if (fileOutputStream != null) {
                 fileOutputStream.close();
             }
+            CURRENT_DATA_TRANSFER_FILE_SIZE = 0;
         }
     }
 
@@ -100,6 +117,10 @@ public class GKMultiplexer {
         } catch (IOException e) {
             Log.e(TAG, "Exception occurred during cleanup", e);
         }
+    }
+
+    public long getCurrentDataTransferSize() {
+        return CURRENT_DATA_TRANSFER_FILE_SIZE;
     }
 
     private byte[] readCommandLine(DataPacket packet) throws IOException {

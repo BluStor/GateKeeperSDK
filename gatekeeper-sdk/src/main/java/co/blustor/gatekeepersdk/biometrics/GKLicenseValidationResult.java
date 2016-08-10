@@ -21,5 +21,10 @@ public enum GKLicenseValidationResult {
     /**
      * An error occurred in the process of activating or validating a license
      */
-    ERROR
+    ERROR,
+    /**
+     * An IO error occurred communicating with the card
+     */
+    COMMUNICATION_ERROR
+
 }

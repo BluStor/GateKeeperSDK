@@ -1,5 +1,7 @@
 package co.blustor.gatekeepersdk.services;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +69,8 @@ public class GKFileActions {
      * @since 0.5.0
      */
     public PutFileResult putFile(InputStream localFile, String cardPath) throws IOException {
+        Log.d(TAG, "putFile(InputStream, cardPath");
+        Log.d(TAG, "putFile(): cardPath = " + cardPath);
         Response response = mCard.put(cardPath, localFile);
         if (response.getStatus() != 226) {
             return new PutFileResult(response);
@@ -118,6 +122,17 @@ public class GKFileActions {
     public FileResult makeDirectory(String cardPath) throws IOException {
         Response response = mCard.createPath(cardPath);
         return new FileResult(response);
+    }
+
+    /**
+     * Returns the current data transfer file size
+     *
+     * @return the {@code FileResult} of the action
+     * @since 0.5.0
+     */
+
+    public long getCurrentDataTransferSize() {
+        return mCard.getCurrentDataTransferSize();
     }
 
     /**

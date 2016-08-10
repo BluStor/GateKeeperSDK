@@ -16,7 +16,7 @@ import co.blustor.gatekeepersdk.utils.GKFileUtils;
  * GKLicensing is responsible for obtaining the licenses necessary for GateKeeper biometrics.
  */
 public class GKLicensing {
-    public static final String TAG = GKLicensing.class.getCanonicalName();
+    private static final String TAG = GKLicensing.class.getCanonicalName();
 
     /**
      * The {@code String} license IDs needed by GateKeeper biometrics.
@@ -59,13 +59,17 @@ public class GKLicensing {
         try {
             String license = getLicense();
             if (license == null) {
+                Log.d(TAG, "obtainLicenses(): return NO_LICENSES_AVAILABLE");
                 return GKLicenseValidationResult.NO_LICENSES_AVAILABLE;
             } else {
+                Log.d(TAG, "obtainLicenses(): Validate license");
                 return validateLicense(license);
             }
-            // return license == null ? GKLicenseValidationResult.NO_LICENSES_AVAILABLE : validateLicense(license);
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+        } catch (IOException e1) {
+            Log.e(TAG, e1.getMessage());
+            return GKLicenseValidationResult.COMMUNICATION_ERROR;
+        } catch (Exception e2) {
+            Log.e(TAG, e2.getMessage());
             return GKLicenseValidationResult.ERROR;
         }
     }
@@ -75,13 +79,11 @@ public class GKLicensing {
         String licenseSubDir = GKFileUtils.joinPath(GKFileUtils.LICENSE_ROOT, mLicenseSubDir);
         GKFile existingLicenseFile = getFirstFile(licenseSubDir, LicenseFileExtensions.LICENSE);
         if (existingLicenseFile != null) {
-            Log.d(TAG, "getLicense() Existing enrolled license found");
             return getFetchExistingLicense().execute(existingLicenseFile);
         }
 
         GKFile serialNumberFile = getFirstFile(GKFileUtils.LICENSE_ROOT, LicenseFileExtensions.SERIAL_NUMBER);
         if (serialNumberFile != null) {
-            Log.d(TAG, "getLicense() Return root enterprise license file");
             return getGenerateActiveLicense().execute(serialNumberFile);
         }
 
@@ -96,21 +98,21 @@ public class GKLicensing {
         for (String component : LICENSES) {
             Log.d(TAG, "validateLicense(): component = " + component);
             if (!mLicenseManager.obtainComponents(component)) {
+                Log.d(TAG, "validateLicense(): return GKLicenseValidationResult.VALIDATION_FAILURE");
                 return GKLicenseValidationResult.VALIDATION_FAILURE;
             }
         }
+        Log.d(TAG, "validateLicense(): return GKLicenseValidationResult.SUCCESS");
         return GKLicenseValidationResult.SUCCESS;
     }
 
     private GKFile getFirstFile(String dir, String extension) throws IOException {
-        Log.d(TAG, "getFirstFile(): Get the first license file in the list");
-        Log.d(TAG, "getFirstFile(): dir = " + dir);
-        Log.d(TAG, "getFirstFile(): extension = " + extension);
+        Log.d(TAG, "getFirstFile(): dir = " + dir + ", extension = " + extension);
         GKFileActions.ListFilesResult listFilesResult = mFileActions.listFiles(dir);
 
         for (GKFile file : listFilesResult.getFiles()) {
             if (extension.equals(file.getExtension())) {
-                Log.d(TAG, "getFirstFile(): return file match = " + file.getName());
+                Log.d(TAG, "getFirstFile(): File match = " + file.getName());
                 return file;
             }
         }
@@ -121,6 +123,7 @@ public class GKLicensing {
     private FetchExistingLicense getFetchExistingLicense() {
         Log.d(TAG, "getFetchExistingLicense()");
         if (mFetchExistingLicense == null) {
+            Log.d(TAG, "mFetchExistingLicense = null.  Create new one");
             mFetchExistingLicense = new FetchExistingLicense(mFileActions);
         }
         return mFetchExistingLicense;
