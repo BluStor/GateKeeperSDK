@@ -4,5 +4,6 @@
 .DS_Store
 /build
 /builds
+/app
 /captures
 gatekeeper-sdk/gatekeeper-sdk.iml

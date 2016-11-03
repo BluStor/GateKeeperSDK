@@ -57,7 +57,7 @@ android {
                 if (new Boolean(is_nested_sdk)) {
                   output.outputFile = new File(gatekeeper_home + "/builds/gatekeepersdk-${defaultConfig.versionName}.aar")
                 } else {
-                  output.outputFile = new File("./builds/gatekeepersdk-${defaultConfig.versionName}.aar")
+                  output.outputFile = new File("../app/builds/gatekeepersdk-${defaultConfig.versionName}.aar")
                }
 
             }
