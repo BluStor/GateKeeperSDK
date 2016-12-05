@@ -26,6 +26,7 @@ import co.blustor.gatekeepersdk.services.GKFileActions;
  * @since 0.5.0
  */
 public class GKEnvironment {
+/*
     public static final String TAG = GKEnvironment.class.getCanonicalName();
 
     private static GKEnvironment mInstance;
@@ -36,7 +37,7 @@ public class GKEnvironment {
         mContext = context;
         mLicensing = buildLicensing(context, fileActions);
     }
-
+*/
     /**
      * Retrieve the {@code GKEnvironment} as a Singleton.
      *
@@ -45,12 +46,14 @@ public class GKEnvironment {
      * @return the {@code GKEnvironment} Singleton
      * @since 0.11.0
      */
+/*
     public static GKEnvironment getInstance(Context context, GKFileActions fileActions) {
         if (mInstance == null) {
             mInstance = new GKEnvironment(context, fileActions);
         }
         return mInstance;
     }
+*/
 
     /**
      * Begin establishing the state required by GateKeeper biometrics.
@@ -60,6 +63,7 @@ public class GKEnvironment {
      * @return the {@code AsyncTask} performing the initialization
      * @since 0.5.0
      */
+/*
     public AsyncTask<Void, Void, GKLicenseValidationResult> initialize(final InitializationListener listener) {
         Log.d(TAG, "initialize()");
         AsyncTask<Void, Void, GKLicenseValidationResult> asyncTask = new AsyncTask<Void, Void, GKLicenseValidationResult>() {
@@ -144,6 +148,7 @@ public class GKEnvironment {
         Log.d(TAG, "ensureDataFilesExist(): Add faces file to Data File Manager");
         NDataFileManager.getInstance().addFile(facesFile.getAbsolutePath());
     }
+*/
 
     /**
      * An InitializationListener will be notified when GateKeeper biometrics are ready
@@ -151,6 +156,7 @@ public class GKEnvironment {
      *
      * @since 0.11.0
      */
+
     public interface InitializationListener {
         void onLicensesObtained();
         void onNoLicensesAvailable();
@@ -158,4 +164,5 @@ public class GKEnvironment {
         void onLicenseValidationError();
         void onCommunicationError();
     }
+
 }

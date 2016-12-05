@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import co.blustor.gatekeepersdk.biometrics.GKLicensing;
 import co.blustor.gatekeepersdk.data.GKMultiplexer;
 import co.blustor.gatekeepersdk.utils.GKStringUtils;
 
@@ -334,6 +335,11 @@ public class GKBluetoothCard implements GKCard {
     private File createDataFile() throws IOException {
         Log.d(TAG, "createDataFile()");
         return File.createTempFile("data", "tmp", mDataCacheDir);
+/*
+        String filename = mDataCacheDir + "/" + GKLicensing.LICENSE_SERIAL_FILE_NAME;
+        Log.d(TAG, "createDataFile(): mDataCacheDir = " + mDataCacheDir);
+        return new File(filename);
+*/
     }
 
     private Response call(String method, String cardPath) throws IOException {

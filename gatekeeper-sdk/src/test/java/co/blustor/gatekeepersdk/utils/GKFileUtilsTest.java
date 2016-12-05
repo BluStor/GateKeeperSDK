@@ -15,6 +15,8 @@ public class GKFileUtilsTest {
     @Test
     public void joinPathCreatesAValidFilePathWithMultipleParts() {
         assertThat(GKFileUtils.joinPath("test", "ing", "this"), is(equalTo("test/ing/this")));
+        assertThat(GKFileUtils.joinPath("/license/18_83_31_E4_32_BE", "license.lic"), is(equalTo("/license/18_83_31_E4_32_BE/license.lic")));
+        System.out.println(GKFileUtils.joinPath("/license/18_83_31_E4_32_BE", "license.lic"));
     }
 
     @Test
