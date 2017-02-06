@@ -164,8 +164,10 @@ public class GKBluetoothCard implements GKCard {
                 } catch (Exception e1) {
                     Log.e(TAG, e1.getMessage());
                     try {
+/*
                         Log.d(TAG, "Recycle bluetooth adaptor");
-                        GKBluetoothUtil.cycleBluetoothAdaptor();
+                        GKBluetoothUtil.cycleBluetoothAdaptor() ;
+*/
                         Log.d(TAG, "Attempt to connect again");
                         mBluetoothSocket.connect();
                     } catch (Exception e2) {
